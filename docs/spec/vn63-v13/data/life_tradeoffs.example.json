@@ -1,0 +1,30 @@
+{
+  "$schema_note": "Fixture for gameplay prototyping only; all numeric coefficients are assumptions and not measured Vietnam population estimates.",
+  "version": "1.1.0",
+  "quality": "MODEL_ASSUMPTION",
+  "timeBudgetHoursPerWeek": 168,
+  "timeCategories": ["sleep", "paidWork", "commute", "essentialHousehold", "caregiving", "education", "socialFamily", "socialFriends", "exercise", "hobby", "rest", "other"],
+  "exampleAdultSchedules": {
+    "BALANCED": {
+      "sleep": 56, "paidWork": 40, "commute": 7, "essentialHousehold": 30,
+      "caregiving": 0, "education": 5, "socialFamily": 12, "socialFriends": 5,
+      "exercise": 5, "hobby": 0, "rest": 8, "other": 0
+    },
+    "CAREER_SPRINT": {
+      "sleep": 56, "paidWork": 55, "commute": 7, "essentialHousehold": 30,
+      "caregiving": 0, "education": 4, "socialFamily": 5, "socialFriends": 5,
+      "exercise": 2, "hobby": 0, "rest": 4, "other": 0
+    }
+  },
+  "wellbeingPrototype": {
+    "moodMemoryWeight": 0.55,
+    "lifeSatisfactionMemoryWeight": 0.92,
+    "barMoodWeight": 0.30,
+    "barSatisfactionWeight": 0.70,
+    "range": [0, 100]
+  },
+  "modeExamples": {
+    "REALISM": {"note": "Calibrate risks where sources exist; no artificial hardship multiplier"},
+    "HARDSHIP": {"note": "Scenario preset only: increase mild/medium obstacles and recovery difficulty; never mislabel as real frequency"}
+  }
+}

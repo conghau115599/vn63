@@ -1,0 +1,38 @@
+{
+  "name": "vn63",
+  "version": "0.2.0",
+  "private": true,
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build --webpack",
+    "start": "node scripts/serve.mjs",
+    "typecheck": "tsc --noEmit",
+    "validate:content": "node scripts/validate-fixtures.mjs",
+    "test": "node --import ./scripts/windows-local.mjs node_modules/vitest/vitest.mjs run --configLoader native",
+    "test:e2e": "playwright test",
+    "simulate": "tsc -p tsconfig.sim.json && node .sim-build/scripts/simulate.js",
+    "qa:v13": "tsc -p tsconfig.sim.json && node .sim-build/scripts/qa-v13.js"
+  },
+  "dependencies": {
+    "idb": "8.0.4",
+    "next": "16.4.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "ajv": "8.20.0",
+    "fast-check": "4.10.2",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}

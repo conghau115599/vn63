@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
+    "outDir": ".sim-build",
+    "noEmit": false,
+    "incremental": false,
+    "isolatedModules": false,
+    "plugins": [],
+    "types": ["node"]
+  },
+  "include": [
+    "scripts/simulate.ts",
+    "scripts/qa-v13.ts",
+    "scripts/qa-careers.ts",
+    "src/simulation/**/*.ts",
+    "src/content/**/*.json"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "version": "UNPOPULATED_TEMPLATE",
+  "taxonomy": "VN_63_2024",
+  "referenceYear": 2024,
+  "indicators": [
+    {
+      "indicatorKey": "births",
+      "provinceId": "ha-noi",
+      "value": null,
+      "unit": "persons_per_year",
+      "sourceTitle": null,
+      "sourceUrl": null,
+      "publishedAt": null,
+      "sourceReferenceYear": 2024,
+      "qualityTier": "MISSING",
+      "estimationMethod": null,
+      "uncertainty": null
+    },
+    {
+      "indicatorKey": "residentPopulation",
+      "provinceId": "ha-noi",
+      "value": null,
+      "unit": "persons",
+      "sourceTitle": null,
+      "sourceUrl": null,
+      "publishedAt": null,
+      "sourceReferenceYear": 2024,
+      "qualityTier": "MISSING",
+      "estimationMethod": null,
+      "uncertainty": null
+    },
+    {
+      "indicatorKey": "medianHouseholdIncome",
+      "provinceId": "ha-noi",
+      "value": null,
+      "unit": "VND_per_household_per_month",
+      "sourceTitle": null,
+      "sourceUrl": null,
+      "publishedAt": null,
+      "sourceReferenceYear": 2024,
+      "qualityTier": "MISSING",
+      "estimationMethod": null,
+      "uncertainty": null
+    }
+  ],
+  "note": "Không suy diễn lương cá nhân từ thu nhập bình quân đầu người hay thu nhập hộ. MISSING cần fallback rõ, không tự điền giá trị."
+}

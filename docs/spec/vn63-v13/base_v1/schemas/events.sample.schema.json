@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/vn63/schemas/events.sample.schema.json",
+  "title": "VN63 Event Pack structural schema (sample)",
+  "type": "object",
+  "required": ["schemaVersion", "packId", "status", "events"],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "packId": {"type": "string", "minLength": 1},
+    "status": {"type": "string"},
+    "events": {"type": "array", "items": {"$ref": "#/$defs/event"}, "minItems": 1}
+  },
+  "$defs": {
+    "predicate": {
+      "type": "object", "required": ["op"],
+      "properties": {
+        "op": {"enum": ["all", "any", "not", "compare", "hasTag", "activeArc"]},
+        "terms": {"type": "array", "items": {"$ref": "#/$defs/predicate"}},
+        "term": {"$ref": "#/$defs/predicate"},
+        "path": {"type": "string"},
+        "cmp": {"enum": ["eq", "ne", "gt", "gte", "lt", "lte"]},
+        "tag": {"type": "string"},
+        "arcId": {"type": "string"}
+      }
+    },
+    "effect": {
+      "type": "object", "required": ["op"],
+      "properties": {
+        "op": {"enum": ["ledgerTransfer", "modifyStat", "addDebt", "setFlag", "beginArc", "schedule", "updateRelationship", "changeJob", "moveProvince"]}
+      }
+    },
+    "outcome": {
+      "type": "object", "required": ["id", "weight", "effects"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "weight": {"type": "number", "minimum": 0, "maximum": 1},
+        "whenHidden": {"type": "object", "properties": {"identity": {"enum": ["LEGITIMATE", "FRAUD"]}}},
+        "effects": {"type": "array", "items": {"$ref": "#/$defs/effect"}}
+      }
+    },
+    "choice": {
+      "type": "object", "required": ["id", "label", "immediateEffects", "outcomes"],
+      "properties": {
+        "id": {"type": "string"}, "label": {"type": "string"},
+        "immediateEffects": {"type": "array", "items": {"$ref": "#/$defs/effect"}},
+        "outcomes": {"type": "array", "items": {"$ref": "#/$defs/outcome"}, "minItems": 1}
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "version", "category", "ageRange", "eligibility", "exposureModelRef", "dataQuality", "cooldownMonths", "presentation", "choices", "sensitivity"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "category": {"type": "string"},
+        "ageRange": {"type": "object", "required": ["min", "max"], "properties": {"min": {"type": "integer", "minimum": 0}, "max": {"type": "integer", "minimum": 0}}},
+        "eligibility": {"$ref": "#/$defs/predicate"},
+        "exposureModelRef": {"type": "string"},
+        "dataQuality": {"enum": ["OFFICIAL", "DERIVED", "ESTIMATED", "ASSUMPTION", "MISSING"]},
+        "cooldownMonths": {"type": "integer", "minimum": 0},
+        "presentation": {"type": "object", "required": ["title", "body"], "properties": {"title": {"type": "string"}, "body": {"type": "string"}}},
+        "choices": {"type": "array", "items": {"$ref": "#/$defs/choice"}, "minItems": 1},
+        "sensitivity": {"type": "string"}
+      }
+    }
+  }
+}

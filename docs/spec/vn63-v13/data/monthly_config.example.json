@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.2.0",
+  "dateSystem": "gregorian",
+  "locale": "vi-VN",
+  "calendarTimezone": "Asia/Ho_Chi_Minh",
+  "simulationStep": "calendar_month",
+  "timeUnits": { "daysPerWeek": 7, "minutesPerDay": 1440, "hoursPerWeek": 168 },
+  "policyPersistence": "until_changed_or_invalidated",
+  "autoAdvance": {
+    "speedOptions": [1, 4, 12],
+    "stopOnCriticalDecision": true,
+    "allowEmptyMonths": true,
+    "simulateEverySkippedMonth": true,
+    "maxAutoplayMonthsPerBatch": 120
+  },
+  "leapDayBirthdayInNonLeapYear": "february_28",
+  "eventDefaults": { "cooldownMonths": 6, "mandatoryMonthlyDecision": false },
+  "sourceLabel": "GAME_DESIGN_ASSUMPTION",
+  "modes": {
+    "REALISM": { "enabled": true, "description": "Official values only when cited; otherwise modeled assumptions." },
+    "HARDSHIP": { "enabled": true, "description": "Greater ordinary disruptions, not fabricated official statistics." }
+  }
+}

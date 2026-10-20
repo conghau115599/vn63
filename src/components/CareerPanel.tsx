@@ -1,0 +1,167 @@
+"use client";
+import { useState } from "react";
+import {
+  careerRequirements,
+  practiceLimit,
+  type CareerPlan,
+  type Talent,
+} from "../simulation/careers";
+import { ageOn } from "../simulation/calendar/YearMonth";
+import type { GameState, MonthlyInput } from "../simulation/types";
+export function CareerPanel({
+  game,
+  onAdvance,
+}: {
+  game: GameState;
+  onAdvance: (input: Partial<MonthlyInput>) => void;
+}) {
+  const c = game.careerDevelopment,
+    age = ageOn(game.birthDate, `${game.currentMonth}-01`),
+    locked = !!game.cursor || !game.living;
+  const [goal, setGoal] = useState<Talent>(
+    c.goal === "GENERAL" ? "ATHLETE" : c.goal,
+  );
+  const [hours, setHours] = useState(
+    Math.min(practiceLimit(age), c.hours || 8),
+  );
+  const clubReasons = careerRequirements(game, goal, "JOIN_CLUB"),
+    trialReasons = careerRequirements(game, goal, "TRYOUT");
+  const act = (action?: CareerPlan["action"]) =>
+    onAdvance({
+      careerPlan: { goal, hours: Math.min(hours, practiceLimit(age)), action },
+    });
+  return (
+    <div className="insight-stack">
+      <section className="panel">
+        <p className="eyebrow">CHỦ ĐỘNG THEO ĐUỔI MỘT NGHỀ</p>
+        <h2>Từ nền tảng đến hợp đồng đầu tiên</h2>
+        <p>
+          Luyện tập → câu lạc bộ / hồ sơ biểu diễn → tuyển chọn → hợp đồng. Bạn
+          chủ động đăng ký khi đủ điều kiện, không phải chờ sự kiện hiếm.
+        </p>
+        <p className="fine">
+          Sức khỏe hỗ trợ thể thao; năng khiếu hỗ trợ tốc độ học. Kỹ năng, số
+          giờ tích lũy và hồ sơ thực hành là những điều kiện riêng. Trẻ nhỏ
+          luyện dưới sự hướng dẫn của người chăm sóc.
+        </p>
+        <div className="business-form">
+          <label>
+            Hướng theo đuổi
+            <select
+              value={goal}
+              onChange={(e) => setGoal(e.target.value as Talent)}
+            >
+              <option value="ATHLETE">Vận động viên</option>
+              <option value="ARTIST">Nghệ sĩ biểu diễn</option>
+            </select>
+          </label>
+          <label>
+            Giờ luyện tập mỗi tuần
+            <input
+              type="number"
+              min={0}
+              max={practiceLimit(age)}
+              value={hours}
+              onChange={(e) => setHours(Number(e.target.value))}
+            />
+          </label>
+        </div>
+        <div className="business-actions">
+          <button className="primary" disabled={locked} onClick={() => act()}>
+            Luyện tập & sang tháng
+          </button>
+          <button
+            className="secondary"
+            disabled={locked}
+            onClick={() =>
+              onAdvance({ careerPlan: { goal: "GENERAL", hours: 0 } })
+            }
+          >
+            Tạm ngừng luyện tập
+          </button>
+        </div>
+        <p className="fine">
+          Kế hoạch duy trì qua các tháng, tối đa {practiceLimit(age)} giờ/tuần ở
+          tuổi này. Thời gian lấy từ nghỉ ngơi, giao tiếp, học hoặc kinh doanh;
+          nghĩa vụ chăm sóc có thể làm giảm giờ thực tế.
+        </p>
+        <p>
+          Đang theo:{" "}
+          {c.goal === "GENERAL"
+            ? "Chưa chọn"
+            : c.goal === "ATHLETE"
+              ? "Thể thao"
+              : "Biểu diễn"}{" "}
+          · {c.hours} giờ/tuần. Hợp đồng:{" "}
+          {game.job?.occupation === "ATHLETE"
+            ? "Vận động viên"
+            : game.job?.occupation === "ARTIST"
+              ? "Nghệ sĩ biểu diễn"
+              : "Chưa vào nghề này"}
+          .
+        </p>
+      </section>
+      <section className="panel">
+        <h2>
+          {goal === "ATHLETE" ? "Lộ trình thể thao" : "Lộ trình biểu diễn"}
+        </h2>
+        <p>
+          Năng khiếu {c.aptitude[goal]}/100 · kỹ năng {c.skill[goal].toFixed(1)}
+          /100 · đã luyện {(c.minutes[goal] / 60).toFixed(1)} giờ.
+        </p>
+        {goal === "ARTIST" && (
+          <p>
+            Hồ sơ biểu diễn: {c.portfolio.toFixed(1)} / 20 điểm để dự tuyển.
+          </p>
+        )}
+        <h3>1. Câu lạc bộ</h3>
+        <p>
+          {c.club[goal]
+            ? "Đã tham gia; luyện có hướng dẫn giúp tiến bộ nhanh hơn."
+            : clubReasons.length
+              ? clubReasons.join(" · ")
+              : "Đủ điều kiện tham gia."}
+        </p>
+        <button
+          className="secondary"
+          disabled={locked || !!clubReasons.length}
+          onClick={() => act("JOIN_CLUB")}
+        >
+          Tham gia câu lạc bộ & sang tháng
+        </button>
+        <h3>2. Tuyển chọn chuyên nghiệp</h3>
+        <p>
+          {trialReasons.length
+            ? trialReasons.join(" · ")
+            : "Đủ điều kiện dự tuyển. Kết quả còn phụ thuộc kỹ năng, nền tảng, kinh nghiệm và mệt mỏi."}
+        </p>
+        <button
+          className="primary"
+          disabled={locked || !!trialReasons.length}
+          onClick={() => act("TRYOUT")}
+        >
+          Đăng ký tuyển chọn & sang tháng
+        </button>
+        <p className="fine">
+          Tuyển chọn dùng 2 giờ đầu tháng. Ngưỡng đạt 58 điểm; biến động kết quả
+          giới hạn ±4 điểm. Chưa đạt được thử lại sau 3 tháng. Đạt sẽ dừng ở lời
+          mời hợp đồng để bạn quyết định.
+        </p>
+        {c.trials
+          .slice(-6)
+          .reverse()
+          .map((t) => (
+            <p key={`${t.month}/${t.goal}`}>
+              {t.month} · {t.goal === "ATHLETE" ? "Thể thao" : "Biểu diễn"} ·{" "}
+              {t.score.toFixed(1)} điểm · {t.passed ? "Đạt" : "Cần luyện thêm"}
+            </p>
+          ))}
+        <p className="fine">
+          Vào nghề và nổi tiếng là hai bước riêng. Alpha hiện có hợp đồng 6
+          tháng, chưa mô phỏng giải đấu, album, giải thưởng hay danh tiếng. Mức
+          lương và điều kiện là giả định gameplay.
+        </p>
+      </section>
+    </div>
+  );
+}

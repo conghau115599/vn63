@@ -1,0 +1,576 @@
+{
+  "schemaVersion": "1.0",
+  "taxonomyId": "VN_63_2024",
+  "asOf": "2024-12-31",
+  "quality": "ADMIN_NAMES_ONLY",
+  "note": "Danh mục lịch sử 63 đơn vị cấp tỉnh tại ngày 31/12/2024; slug là ID nội bộ, KHÔNG phải mã hành chính chính thức. Số liệu dân số/sinh/thu nhập KHÔNG được điền trong tệp này.",
+  "provinces": [
+    {
+      "id": "ha-noi",
+      "name": "Hà Nội",
+      "kind": "municipality",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ha-giang",
+      "name": "Hà Giang",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "cao-bang",
+      "name": "Cao Bằng",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "bac-kan",
+      "name": "Bắc Kạn",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "tuyen-quang",
+      "name": "Tuyên Quang",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "lao-cai",
+      "name": "Lào Cai",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "dien-bien",
+      "name": "Điện Biên",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "lai-chau",
+      "name": "Lai Châu",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "son-la",
+      "name": "Sơn La",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "yen-bai",
+      "name": "Yên Bái",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "hoa-binh",
+      "name": "Hòa Bình",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "thai-nguyen",
+      "name": "Thái Nguyên",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "lang-son",
+      "name": "Lạng Sơn",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "quang-ninh",
+      "name": "Quảng Ninh",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "bac-giang",
+      "name": "Bắc Giang",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "phu-tho",
+      "name": "Phú Thọ",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "vinh-phuc",
+      "name": "Vĩnh Phúc",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "bac-ninh",
+      "name": "Bắc Ninh",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "hai-duong",
+      "name": "Hải Dương",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "hai-phong",
+      "name": "Hải Phòng",
+      "kind": "municipality",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "hung-yen",
+      "name": "Hưng Yên",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "thai-binh",
+      "name": "Thái Bình",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ha-nam",
+      "name": "Hà Nam",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "nam-dinh",
+      "name": "Nam Định",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ninh-binh",
+      "name": "Ninh Bình",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "thanh-hoa",
+      "name": "Thanh Hóa",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "nghe-an",
+      "name": "Nghệ An",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ha-tinh",
+      "name": "Hà Tĩnh",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "quang-binh",
+      "name": "Quảng Bình",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "quang-tri",
+      "name": "Quảng Trị",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "thua-thien-hue",
+      "name": "Thừa Thiên Huế",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "da-nang",
+      "name": "Đà Nẵng",
+      "kind": "municipality",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "quang-nam",
+      "name": "Quảng Nam",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "quang-ngai",
+      "name": "Quảng Ngãi",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "binh-dinh",
+      "name": "Bình Định",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "phu-yen",
+      "name": "Phú Yên",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "khanh-hoa",
+      "name": "Khánh Hòa",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ninh-thuan",
+      "name": "Ninh Thuận",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "binh-thuan",
+      "name": "Bình Thuận",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "kon-tum",
+      "name": "Kon Tum",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "gia-lai",
+      "name": "Gia Lai",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "dak-lak",
+      "name": "Đắk Lắk",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "dak-nong",
+      "name": "Đắk Nông",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "lam-dong",
+      "name": "Lâm Đồng",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "binh-phuoc",
+      "name": "Bình Phước",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "tay-ninh",
+      "name": "Tây Ninh",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "binh-duong",
+      "name": "Bình Dương",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "dong-nai",
+      "name": "Đồng Nai",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ba-ria-vung-tau",
+      "name": "Bà Rịa - Vũng Tàu",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "tp-ho-chi-minh",
+      "name": "TP. Hồ Chí Minh",
+      "kind": "municipality",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "long-an",
+      "name": "Long An",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "tien-giang",
+      "name": "Tiền Giang",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ben-tre",
+      "name": "Bến Tre",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "tra-vinh",
+      "name": "Trà Vinh",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "vinh-long",
+      "name": "Vĩnh Long",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "dong-thap",
+      "name": "Đồng Tháp",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "an-giang",
+      "name": "An Giang",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "kien-giang",
+      "name": "Kiên Giang",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "can-tho",
+      "name": "Cần Thơ",
+      "kind": "municipality",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "hau-giang",
+      "name": "Hậu Giang",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "soc-trang",
+      "name": "Sóc Trăng",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "bac-lieu",
+      "name": "Bạc Liêu",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    },
+    {
+      "id": "ca-mau",
+      "name": "Cà Mau",
+      "kind": "province",
+      "officialCode": null,
+      "births": null,
+      "population": null,
+      "dataQuality": "MISSING"
+    }
+  ]
+}

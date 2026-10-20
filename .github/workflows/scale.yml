@@ -1,0 +1,46 @@
+name: Full scale synthetic QA (100k lives)
+on:
+  workflow_dispatch:
+jobs:
+  lifetime-shards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx tsc -p tsconfig.sim.json
+      - name: 2500 distinct full lifetimes in this shard
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: node .sim-build/scripts/simulate.js --count=2500 --offset=$((SHARD * 2500)) --decision-policy=decline --output=qa-results/lifetimes-${SHARD}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lifetime-shard-${{ matrix.shard }}
+          path: qa-results/lifetimes-*.json
+  summarize:
+    needs: lifetime-shards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: lifetime-shard-*
+          merge-multiple: true
+          path: qa-results/scale
+      - run: node scripts/aggregate-scale.mjs qa-results/scale
+      - uses: actions/upload-artifact@v4
+        with:
+          name: full-lifetime-summary
+          path: qa-results/scale-summary.json

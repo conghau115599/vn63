@@ -1,0 +1,36 @@
+{
+  "sourceGrade": "ASSUMPTION",
+  "purpose": "Synthetic progression comparison, not real career probabilities",
+  "hoursPerWeek": 10,
+  "initialCashVnd": "500000000",
+  "rows": [
+    {
+      "goal": "ATHLETE",
+      "strength": "GENERAL",
+      "seeds": 100,
+      "signedWithin36Months": 100,
+      "meanMonthsAmongSigned": 18.26
+    },
+    {
+      "goal": "ATHLETE",
+      "strength": "ATHLETE",
+      "seeds": 100,
+      "signedWithin36Months": 100,
+      "meanMonthsAmongSigned": 10.83
+    },
+    {
+      "goal": "ARTIST",
+      "strength": "GENERAL",
+      "seeds": 100,
+      "signedWithin36Months": 100,
+      "meanMonthsAmongSigned": 17.26
+    },
+    {
+      "goal": "ARTIST",
+      "strength": "ARTIST",
+      "seeds": 100,
+      "signedWithin36Months": 100,
+      "meanMonthsAmongSigned": 10.28
+    }
+  ]
+}

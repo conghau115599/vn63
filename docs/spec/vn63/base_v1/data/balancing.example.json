@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0",
+  "label": "GAMEPLAY BALANCE STARTER - NOT STATISTICAL RATES",
+  "worldScenario": "REFERENCE_2024_FORWARD_SCENARIO",
+  "modeProfiles": {
+    "REALISM": {
+      "economicShockExposureMultiplier": 1.0,
+      "scamOfferExposureMultiplier": 1.0,
+      "relationshipConflictExposureMultiplier": 1.0,
+      "decisionDensityMultiplier": 1.0,
+      "positiveSafetyNetFactor": 1.0
+    },
+    "HARDSHIP": {
+      "economicShockExposureMultiplier": 1.35,
+      "scamOfferExposureMultiplier": 1.25,
+      "relationshipConflictExposureMultiplier": 1.2,
+      "decisionDensityMultiplier": 1.3,
+      "positiveSafetyNetFactor": 0.85
+    }
+  },
+  "sensitiveHazardsMustRemainIdentical": [
+    "allCauseMortality",
+    "childMortality",
+    "selfHarm",
+    "sexualViolence"
+  ],
+  "warning": "Các hệ số HARDSHIP là minh họa thiết kế cần playtest. REALISM vẫn cần kiểm định dữ liệu nền trước khi tuyên bố sát thống kê."
+}

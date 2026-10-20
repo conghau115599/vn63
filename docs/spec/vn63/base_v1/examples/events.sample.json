@@ -1,0 +1,441 @@
+{
+  "schemaVersion": "1.0",
+  "packId": "vn63-demo",
+  "status": "DEMO_NOT_CALIBRATED",
+  "events": [
+    {
+      "id": "job_layoff_001",
+      "version": 1,
+      "category": "EMPLOYMENT",
+      "description": "Mất việc và phát sinh cung cầu tìm việc",
+      "ageRange": {
+        "min": 18,
+        "max": 65
+      },
+      "eligibility": {
+        "op": "all",
+        "terms": [
+          {
+            "op": "compare",
+            "path": "employment.status",
+            "cmp": "eq",
+            "value": "EMPLOYED"
+          },
+          {
+            "op": "compare",
+            "path": "person.ageYears",
+            "cmp": "gte",
+            "value": 18
+          }
+        ]
+      },
+      "exposureModelRef": "demo.layoff_offer_rate",
+      "dataQuality": "ASSUMPTION",
+      "cooldownMonths": 60,
+      "mutualExclusionGroup": "employment-major-month",
+      "presentation": {
+        "title": "Công ty cắt giảm nhân sự",
+        "body": "Bộ phận bạn làm việc bị thu hẹp. Thu nhập tháng tới chưa chắc còn. Bạn cần tính lại chuyện tiền nhà và công việc."
+      },
+      "choices": [
+        {
+          "id": "look_for_work",
+          "label": "Chủ động tìm việc ngay",
+          "immediateEffects": [
+            {
+              "op": "changeJob",
+              "jobCode": null,
+              "monthlyIncomeVnd": 0
+            },
+            {
+              "op": "setFlag",
+              "key": "looking_for_work",
+              "value": true
+            },
+            {
+              "op": "beginArc",
+              "arcId": "unemployment_recovery",
+              "payload": {
+                "origin": "job_layoff_001"
+              }
+            }
+          ],
+          "outcomes": [
+            {
+              "id": "start_search",
+              "weight": 1.0,
+              "effects": []
+            }
+          ]
+        },
+        {
+          "id": "return_home",
+          "label": "Về quê giảm chi phí sinh hoạt",
+          "immediateEffects": [
+            {
+              "op": "changeJob",
+              "jobCode": null,
+              "monthlyIncomeVnd": 0
+            },
+            {
+              "op": "setFlag",
+              "key": "looking_for_work",
+              "value": true
+            },
+            {
+              "op": "beginArc",
+              "arcId": "relocation_decision",
+              "payload": {
+                "reason": "cost_pressure"
+              }
+            }
+          ],
+          "outcomes": [
+            {
+              "id": "home_road",
+              "weight": 1.0,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "sensitivity": "NONE",
+      "sourceEvidence": [],
+      "authoringNote": "Đây là nội dung hư cấu, chưa có tỷ lệ sa thải ngoài đời."
+    },
+    {
+      "id": "recruitment_offer_001",
+      "version": 1,
+      "category": "SCAM",
+      "ageRange": {
+        "min": 18,
+        "max": 65
+      },
+      "eligibility": {
+        "op": "all",
+        "terms": [
+          {
+            "op": "compare",
+            "path": "person.ageYears",
+            "cmp": "gte",
+            "value": 18
+          },
+          {
+            "op": "hasTag",
+            "tag": "looking_for_work"
+          }
+        ]
+      },
+      "exposureModelRef": "demo.recruitment_offer_rate",
+      "dataQuality": "ASSUMPTION",
+      "cooldownMonths": 48,
+      "mutualExclusionGroup": "recruitment-offer",
+      "hiddenModel": {
+        "identity": "LEGITIMATE_OR_FRAUD",
+        "modelRef": "demo.is_recruitment_offer_fraud",
+        "demoFraudProbability": 0.7,
+        "quality": "ASSUMPTION",
+        "notExposedToUI": true
+      },
+      "presentation": {
+        "title": "Lời mời việc làm mới",
+        "body": "Một đơn vị tuyển dụng hẹn phỏng vấn vị trí trả lương tốt. Họ nói bạn phải trả một khoản phí trước khi nhận việc. Bạn chưa biết lời mời này có đáng tin không."
+      },
+      "choices": [
+        {
+          "id": "verify",
+          "label": "Kiểm tra thông tin công ty và hỏi người quen",
+          "immediateEffects": [
+            {
+              "op": "setFlag",
+              "key": "verified_recruiter",
+              "value": true
+            }
+          ],
+          "outcomes": [
+            {
+              "id": "verify_fraud_warn",
+              "whenHidden": {
+                "identity": "FRAUD"
+              },
+              "weight": 0.8,
+              "effects": [
+                {
+                  "op": "setFlag",
+                  "key": "recruitment_risk_flag",
+                  "value": true
+                }
+              ]
+            },
+            {
+              "id": "verify_fraud_inconclusive",
+              "whenHidden": {
+                "identity": "FRAUD"
+              },
+              "weight": 0.2,
+              "effects": []
+            },
+            {
+              "id": "verify_legit_clean",
+              "whenHidden": {
+                "identity": "LEGITIMATE"
+              },
+              "weight": 0.85,
+              "effects": []
+            },
+            {
+              "id": "verify_legit_uncertain",
+              "whenHidden": {
+                "identity": "LEGITIMATE"
+              },
+              "weight": 0.15,
+              "effects": []
+            }
+          ]
+        },
+        {
+          "id": "pay",
+          "label": "Đồng ý trả khoản phí để giữ cơ hội",
+          "immediateEffects": [],
+          "outcomes": [
+            {
+              "id": "loss_demo",
+              "whenHidden": {
+                "identity": "FRAUD"
+              },
+              "weight": 1.0,
+              "effects": [
+                {
+                  "op": "ledgerTransfer",
+                  "accountFrom": "person.cash",
+                  "accountTo": "external.payee",
+                  "amountVnd": 2000000,
+                  "reason": "recruitment_fee_demo"
+                },
+                {
+                  "op": "beginArc",
+                  "arcId": "scam_recovery",
+                  "payload": {
+                    "lossVnd": 2000000
+                  }
+                }
+              ]
+            },
+            {
+              "id": "legitimate_demo",
+              "whenHidden": {
+                "identity": "LEGITIMATE"
+              },
+              "weight": 1.0,
+              "effects": [
+                {
+                  "op": "beginArc",
+                  "arcId": "recruitment_followup",
+                  "payload": {
+                    "notGuaranteedJob": true
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "decline",
+          "label": "Từ chối và tiếp tục tìm việc",
+          "immediateEffects": [],
+          "outcomes": [
+            {
+              "id": "moved_on",
+              "weight": 1.0,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "sensitivity": "FINANCIAL_DISTRESS",
+      "sourceEvidence": [
+        {
+          "type": "typology",
+          "title": "Bộ Công an: Cảnh giác tuyển dụng việc nhẹ lương cao",
+          "url": "https://www.bocongan.gov.vn/bai-viet/canh-giac-voi-chieu-tro-tuyen-dung-viec-nhe-luong-cao-de-thue-muon-tai-khoan-ngan-hang-1792292719"
+        }
+      ],
+      "authoringNote": "Fraud truth được xác định một lần từ hiddenModel và hoàn toàn ẩn với UI. Outcomes chọn có điều kiện theo fraud truth; weights trong mỗi phân nhóm phải cộng 1. Số 0.70, 0.8, 0.85 chỉ là fixture; production tuyệt đối không xem đây là tỷ lệ ngoài đời."
+    },
+    {
+      "id": "family_illness_001",
+      "version": 1,
+      "category": "HEALTH",
+      "ageRange": {
+        "min": 18,
+        "max": 85
+      },
+      "eligibility": {
+        "op": "all",
+        "terms": [
+          {
+            "op": "hasTag",
+            "tag": "parent_alive"
+          },
+          {
+            "op": "compare",
+            "path": "person.ageYears",
+            "cmp": "gte",
+            "value": 18
+          }
+        ]
+      },
+      "exposureModelRef": "demo.family_illness_rate",
+      "dataQuality": "ASSUMPTION",
+      "cooldownMonths": 48,
+      "mutualExclusionGroup": "family-health",
+      "presentation": {
+        "title": "Người thân cần chăm sóc",
+        "body": "Một người thân phải điều trị và cần người đưa đón, hỗ trợ sinh hoạt. Gia đình đang cố xoay xở tiền bạc và thời gian."
+      },
+      "choices": [
+        {
+          "id": "time",
+          "label": "Giảm giờ làm để chăm sóc",
+          "immediateEffects": [
+            {
+              "op": "modifyStat",
+              "stat": "wellbeing.stress",
+              "delta": 5,
+              "clamp": [
+                0,
+                100
+              ]
+            },
+            {
+              "op": "beginArc",
+              "arcId": "caregiving_recovery",
+              "payload": {
+                "supportType": "time"
+              }
+            }
+          ],
+          "outcomes": [
+            {
+              "id": "caregiving_begins",
+              "weight": 1.0,
+              "effects": []
+            }
+          ]
+        },
+        {
+          "id": "shared",
+          "label": "Trao đổi để cùng gia đình phân chia trách nhiệm",
+          "immediateEffects": [
+            {
+              "op": "beginArc",
+              "arcId": "shared_care_plan",
+              "payload": {}
+            }
+          ],
+          "outcomes": [
+            {
+              "id": "family_plan",
+              "weight": 1.0,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "sensitivity": "ILLNESS",
+      "sourceEvidence": [],
+      "authoringNote": "Giữ mô tả nhẹ, không tạo chẩn đoán y tế cụ thể."
+    },
+    {
+      "id": "debt_recovery_001",
+      "version": 1,
+      "category": "OPPORTUNITY",
+      "ageRange": {
+        "min": 18,
+        "max": 80
+      },
+      "eligibility": {
+        "op": "all",
+        "terms": [
+          {
+            "op": "activeArc",
+            "arcId": "scam_recovery"
+          },
+          {
+            "op": "compare",
+            "path": "person.ageYears",
+            "cmp": "gte",
+            "value": 18
+          }
+        ]
+      },
+      "exposureModelRef": "demo.support_opportunity",
+      "dataQuality": "ASSUMPTION",
+      "cooldownMonths": 24,
+      "mutualExclusionGroup": "recovery-month",
+      "presentation": {
+        "title": "Một cơ hội để phục hồi",
+        "body": "Sau thời gian khó khăn, bạn có cơ hội nhận thêm ca làm hoặc nhờ người tin cậy rà soát kế hoạch chi tiêu. Không cách nào bảo đảm mọi khoản nợ được xử lý ngay."
+      },
+      "choices": [
+        {
+          "id": "extra_hours",
+          "label": "Nhận thêm ca làm nếu sức khỏe cho phép",
+          "immediateEffects": [
+            {
+              "op": "beginArc",
+              "arcId": "supplemental_work",
+              "payload": {
+                "durationMonths": 3
+              }
+            }
+          ],
+          "outcomes": [
+            {
+              "id": "extra_work",
+              "weight": 1.0,
+              "effects": [
+                {
+                  "op": "schedule",
+                  "effect": {
+                    "id": "demo-extra-wage-3m",
+                    "triggerAtMonthOffset": 1,
+                    "effect": {
+                      "op": "ledgerTransfer",
+                      "accountFrom": "employer.payroll",
+                      "accountTo": "person.cash",
+                      "amountVnd": 1000000,
+                      "reason": "extra_work_demo"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "plan",
+          "label": "Rà soát chi tiêu và nghĩa vụ trả nợ",
+          "immediateEffects": [
+            {
+              "op": "beginArc",
+              "arcId": "financial_plan",
+              "payload": {}
+            }
+          ],
+          "outcomes": [
+            {
+              "id": "new_budget",
+              "weight": 1.0,
+              "effects": []
+            }
+          ]
+        }
+      ],
+      "sensitivity": "FINANCIAL_DISTRESS",
+      "sourceEvidence": [],
+      "authoringNote": "Cần gắn idempotencyKey instance-specific khi implement hiệu ứng mẫu."
+    }
+  ],
+  "disclaimer": "Tất cả khoản tiền/tỷ lệ trong pack chỉ là fixture kiểm thử gameplay; không phải thống kê về Việt Nam. Hidden model đang là demo branching và cần tách riêng trước production."
+}

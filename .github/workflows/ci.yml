@@ -1,0 +1,30 @@
+name: Monthly engine QA
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run validate:content
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Targeted lifetime batch
+        run: npm run simulate -- --count=1000 --decision-policy=decline --output=qa-results/ci-1000.json
+      - name: Matched business cohorts (10k per mode/strategy)
+        run: npm run qa:v13 -- --count=10000 --months=24 --output=qa-results/ci-v13-ventures.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: monthly-qa
+          path: |
+            qa-results/
+            playwright-report/

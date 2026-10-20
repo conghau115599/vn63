@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.3.0",
+  "sourceGrade": "ASSUMPTION",
+  "comment": "Illustrative configuration for QA and architecture, not empirical Vietnamese rates",
+  "personality": {
+    "min": 0,
+    "max": 100,
+    "traits": [
+      "conscientiousness",
+      "riskTolerance",
+      "adaptability",
+      "sociability",
+      "persistence",
+      "emotionRegulation"
+    ],
+    "hardLockAtAge": null
+  },
+  "businessIllustration": {
+    "cashOpenVnd": 60000000,
+    "fixedCostVnd": 12000000,
+    "marginRate": 0.35,
+    "revenueCasesVnd": [
+      25000000,
+      45000000
+    ],
+    "note": "Toy example excludes wages/taxes/debt/marketing until explicitly added."
+  },
+  "eventFixtures": [
+    {
+      "id": "EARLY_CAREGIVER_STORY",
+      "earliestAge": 2,
+      "requires": {
+        "caregiverAlive": true
+      },
+      "forbids": [
+        "PERMANENT_PERSONALITY_LOCK"
+      ],
+      "cooldownMonths": 24
+    },
+    {
+      "id": "BUSINESS_SUPPLIER_DELAY",
+      "earliestAge": 18,
+      "requires": {
+        "businessStatus": "ACTIVE",
+        "hasSupplierContract": true
+      },
+      "cooldownMonths": 12
+    },
+    {
+      "id": "ELDER_CARE_SUPPORT",
+      "earliestAge": 18,
+      "requires": {
+        "dependentFamilyMemberAlive": true,
+        "dependentNeedsCare": true
+      },
+      "cooldownMonths": 6
+    },
+    {
+      "id": "LATE_LIFE_PART_TIME",
+      "earliestAge": 60,
+      "requires": {
+        "capableOfWorking": true,
+        "employmentOpportunity": true
+      },
+      "cooldownMonths": 12
+    }
+  ]
+}
