@@ -1,5 +1,11 @@
 # Changelog
 
+## Nhịp cuộc đời & nền tảng nghề nghiệp · 20/10/2026
+
+- Nhịp mặc định 72 giây/năm; Tiếp tục/Tạm dừng, 1×–16×, tiến độ năm và dừng ở lựa chọn. Gộp các tháng yên bình liên tiếp trong nhật ký.
+- Tiềm năng bẩm sinh theo seed cho nhân vật mới; nền tảng và điều kiện học tập tác động rèn luyện và tuyển chọn thể thao/biểu diễn. Bảng nghề giải thích độ phù hợp và điểm sẵn sàng.
+- Giữ chỉ số save cũ, schema 3 tương thích alpha.1/alpha.2. Chi tiết và hệ số giả lập: docs/TIME_AND_CAREER_FIT.md.
+
 ## Nhật ký & lựa chọn · 20/10/2026
 
 - Trang Cuộc đời ưu tiên nhật ký mới nhất, diễn biến tháng đang dừng và dấu vết lựa chọn thực; lọc lựa chọn, đọc thêm lịch sử.

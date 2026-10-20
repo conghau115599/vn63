@@ -80,3 +80,7 @@ Build dùng TypeScript 6 API và worker threads. Playwright CLI cần môi trư�
 ## Giới hạn sản phẩm
 
 Alpha chưa hiệu chuẩn theo thống kê Việt Nam. Danh mục 63 tỉnh là snapshot lịch sử 2024. Tuổi kết thúc 76–95 và NPC 96 là kịch bản demo, chưa là mô hình tử vong. Chưa có đầy đủ bệnh tật, graph gia đình, chính sách/thuế/luật theo năm, scam/khôi phục và inheritance. Các mạch chuyện và ngành nghề còn cần mở rộng. Dữ liệu chơi nằm trên trình duyệt, không có tài khoản hay telemetry.
+
+### Nhịp cuộc đời và nền tảng nghề
+
+Nhịp thường 72 giây/năm, tua 1×–16×, tạm dừng tại quyết định. Nhật ký gộp các tháng yên bình. Hai lộ trình thể thao/biểu diễn xét tiềm năng bẩm sinh giả lập, nền tảng hiện tại và thời gian rèn luyện; không tự cấp thành công chỉ từ năng khiếu. Xem [chi tiết mô hình](docs/TIME_AND_CAREER_FIT.md).

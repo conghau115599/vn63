@@ -2,6 +2,7 @@
 import { useState } from "react";
 import {
   careerRequirements,
+  careerFit,
   practiceLimit,
   type CareerPlan,
   type Talent,
@@ -19,19 +20,64 @@ export function CareerPanel({
     age = ageOn(game.birthDate, `${game.currentMonth}-01`),
     locked = !!game.cursor || !game.living;
   const [goal, setGoal] = useState<Talent>(
-    c.goal === "GENERAL" ? "ATHLETE" : c.goal,
+    c.goal === "GENERAL"
+      ? c.aptitude.ARTIST > c.aptitude.ATHLETE
+        ? "ARTIST"
+        : "ATHLETE"
+      : c.goal,
   );
   const [hours, setHours] = useState(
     Math.min(practiceLimit(age), c.hours || 8),
   );
   const clubReasons = careerRequirements(game, goal, "JOIN_CLUB"),
-    trialReasons = careerRequirements(game, goal, "TRYOUT");
+    trialReasons = careerRequirements(game, goal, "TRYOUT"),
+    fit = careerFit(game, goal);
   const act = (action?: CareerPlan["action"]) =>
     onAdvance({
       careerPlan: { goal, hours: Math.min(hours, practiceLimit(age)), action },
     });
   return (
     <div className="insight-stack">
+      <section className="panel">
+        <p className="eyebrow">HIỂU MÌNH TRƯỚC KHI CHỌN ĐƯỜNG</p>
+        <h2>Nghề nào hợp với nền tảng của bạn?</h2>
+        <div className="career-fit-grid">
+          {(["ATHLETE", "ARTIST"] as const).map((talent) => {
+            const profile = careerFit(game, talent);
+            return (
+              <button
+                key={talent}
+                className={goal === talent ? "fit-card selected" : "fit-card"}
+                aria-pressed={goal === talent}
+                onClick={() => setGoal(talent)}
+              >
+                <b>
+                  {talent === "ATHLETE" ? "Vận động viên" : "Nghệ sĩ biểu diễn"}
+                </b>
+                <span>
+                  Tiềm năng bẩm sinh <strong>{c.aptitude[talent]}/100</strong>
+                </span>
+                <span>
+                  Nền tảng hiện tại{" "}
+                  <strong>{profile.foundation.toFixed(0)}/100</strong>
+                </span>
+                <small>
+                  {c.aptitude[talent] >= 75
+                    ? "Có lợi thế bẩm sinh"
+                    : c.aptitude[talent] >= 50
+                      ? "Có thể phát triển qua rèn luyện"
+                      : "Cần kiên trì và nền tảng hỗ trợ"}
+                </small>
+              </button>
+            );
+          })}
+        </div>
+        <p className="fine">
+          Tiềm năng bẩm sinh là cách game giả lập yếu tố di truyền, giữ nguyên
+          trong cuộc đời. Đây không phải đánh giá gene thật. Tiềm năng giúp học
+          nhanh và tiến xa hơn; mục tiêu, cơ hội và nỗ lực vẫn cần đi cùng nhau.
+        </p>
+      </section>
       <section className="panel">
         <p className="eyebrow">CHỦ ĐỘNG THEO ĐUỔI MỘT NGHỀ</p>
         <h2>Từ nền tảng đến hợp đồng đầu tiên</h2>
@@ -185,6 +231,23 @@ export function CareerPanel({
           Tham gia câu lạc bộ & sang tháng
         </button>
         <h3>2. Tuyển chọn chuyên nghiệp</h3>
+        <p className="career-readiness">
+          Mức sẵn sàng hiện tại: <b>{fit.readiness.toFixed(1)} / 58 điểm</b>
+        </p>
+        <p className="fine">
+          Kỹ năng 60% · bẩm sinh 15% · kinh nghiệm 13% · nền tảng 12%, trừ mệt
+          mỏi.{" "}
+          {goal === "ATHLETE"
+            ? "Nền tảng thể thao dựa trên sức khỏe và khả năng hồi phục."
+            : "Nền tảng biểu diễn dựa trên kiến thức, tinh thần và khả năng hồi phục."}{" "}
+          Điều kiện học tập{" "}
+          {game.context.resources === "AFFLUENT"
+            ? "dồi dào"
+            : game.context.resources === "LIMITED"
+              ? "hạn chế"
+              : "ổn định"}{" "}
+          ảnh hưởng tốc độ rèn luyện. Đổi mục tiêu giữ lại kỹ năng đã có.
+        </p>
         <p>
           {trialReasons.length
             ? trialReasons.join(" · ")

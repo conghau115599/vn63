@@ -27,6 +27,11 @@ import { deserialize, serialize } from "../simulation/save";
 import { loadGame, saveGame } from "../persistence/store";
 import type { GameState, MonthlyInput } from "../simulation/types";
 import provinceData from "../content/provinces.2024.json";
+import {
+  YEAR_SECONDS,
+  PLAYBACK_SPEEDS,
+  monthDelay,
+} from "../simulation/playback";
 
 const money = (v: string | bigint) =>
   new Intl.NumberFormat("vi-VN", {
@@ -191,7 +196,7 @@ export default function Home() {
     if (!(auto || seek) || !game?.living || game.pendingDecision) return;
     const timer = setTimeout(
       () => run(seek ? 12 : 1),
-      seek ? 30 : 1200 / speed,
+      seek ? 30 : monthDelay(speed),
     );
     return () => clearTimeout(timer);
   }, [auto, seek, speed, game, run]);
@@ -209,7 +214,7 @@ export default function Home() {
     );
     setTab("overview");
     setError("");
-    setAuto(false);
+    setAuto(true);
     setSeek(false);
   };
   const exportSave = () => {
@@ -315,13 +320,13 @@ export default function Home() {
           <small>
             {game.pendingDecision
               ? "Chọn để tiếp tục tháng hiện tại"
-              : "Mỗi bước là một tháng lịch"}
+              : `1 năm ≈ ${(YEAR_SECONDS / speed).toLocaleString("vi-VN")} giây · ${speed}×`}
           </small>
         </div>
       </div>
       <div className="playback-controls">
         <div className="speed-group" aria-label="Tốc độ">
-          {[1, 4, 12].map((v) => (
+          {PLAYBACK_SPEEDS.map((v) => (
             <button
               key={v}
               aria-pressed={speed === v}
@@ -340,7 +345,7 @@ export default function Home() {
             setSeek(false);
           }}
         >
-          {auto ? "Tạm dừng" : "Tự động"}
+          {auto ? "Tạm dừng" : "Tiếp tục"}
         </button>
         <button
           className="text-button next-decision"
@@ -359,6 +364,27 @@ export default function Home() {
         >
           Sang tháng <span>→</span>
         </button>
+      </div>
+      <div
+        className="year-clock"
+        role="progressbar"
+        aria-label={`Năm ${game.currentMonth.slice(0, 4)}`}
+        aria-valuemin={0}
+        aria-valuemax={12}
+        aria-valuenow={Number(game.currentMonth.slice(5)) - 1}
+      >
+        <span
+          key={`${game.currentMonth}/${speed}/${auto}`}
+          className={auto ? "clock-running" : ""}
+          style={
+            {
+              width: `${((Number(game.currentMonth.slice(5)) - 1) / 12) * 100}%`,
+              animationDuration: `${monthDelay(speed)}ms`,
+              "--clock-from": `${((Number(game.currentMonth.slice(5)) - 1) / 12) * 100}%`,
+              "--clock-to": `${(Number(game.currentMonth.slice(5)) / 12) * 100}%`,
+            } as React.CSSProperties
+          }
+        />
       </div>
     </section>
   ) : null;
@@ -1213,8 +1239,9 @@ export default function Home() {
                     <h3>Tháng lịch là đơn vị thật của engine</h3>
                     <p>
                       Mỗi bước xử lý một tháng Gregory, gồm từng ngày, nghĩa vụ,
-                      thu chi và sự kiện. Tốc độ 1×/4×/12× chỉ đổi thời gian
-                      trình diễn. Mọi quyết định quan trọng đều dừng tự động.
+                      thu chi và sự kiện. Nhịp 1× là khoảng 72 giây/năm; các mức
+                      tua 1×–16× chỉ đổi thời gian trình diễn. Mọi quyết định
+                      quan trọng đều dừng tự động.
                     </p>
                     <h3>Dữ liệu & địa phương</h3>
                     <p>

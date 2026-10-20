@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { GameState } from "../simulation/types";
+import { monthsBetween } from "../simulation/calendar/YearMonth";
 
 function storyText(event: { kind: string; text: string }) {
   if (event.kind !== "arc") return event.text;
@@ -166,6 +167,23 @@ export function LifeJournal({
     filter === "choices"
       ? months.filter((m) => m.events.some((e) => e.kind === "decision"))
       : months;
+  const groups: Array<
+    (typeof months)[number] & { oldest: string; count: number }
+  > = [];
+  for (const month of visible) {
+    const previous = groups.at(-1);
+    if (
+      !month.pending &&
+      !month.events.length &&
+      previous &&
+      !previous.pending &&
+      !previous.events.length &&
+      monthsBetween(month.month, previous.oldest) === 1
+    ) {
+      previous.oldest = month.month;
+      previous.count++;
+    } else groups.push({ ...month, oldest: month.month, count: 1 });
+  }
   return (
     <section className="panel life-journal" aria-label="Nhật ký cuộc đời">
       <div className="section-heading">
@@ -196,13 +214,19 @@ export function LifeJournal({
         </button>
       </div>
       <div className="story-timeline">
-        {visible.slice(0, limit).map((month, index) => (
+        {groups.slice(0, limit).map((month, index) => (
           <article
             className={`story-month ${index === 0 ? "latest-story" : ""}`}
             key={month.month}
           >
             <div className="story-date">
               <time dateTime={month.month}>
+                {month.count > 1 && (
+                  <>
+                    {month.oldest.slice(5)}/{month.oldest.slice(0, 4)}
+                    <br />–{" "}
+                  </>
+                )}
                 {month.month.slice(5)}/{month.month.slice(0, 4)}
               </time>
               <span>
@@ -236,7 +260,9 @@ export function LifeJournal({
                 <p className="story-quiet">
                   {month.pending
                     ? "Tháng này vẫn đang mở. Hãy xem lại những điều đã xảy ra trước khi quyết định."
-                    : "Một tháng bình yên. Nhịp sống thường ngày vẫn tiếp diễn."}
+                    : month.count > 1
+                      ? `${month.count} tháng bình yên trôi qua. Nhịp sống thường ngày vẫn tiếp diễn.`
+                      : "Một tháng bình yên. Nhịp sống thường ngày vẫn tiếp diễn."}
                 </p>
               )}
             </div>
@@ -259,7 +285,7 @@ export function LifeJournal({
         </div>
       )}
       <div className="story-footer">
-        {visible.length > limit && (
+        {groups.length > limit && (
           <button className="secondary" onClick={() => setLimit(limit + 12)}>
             Đọc thêm những tháng trước
           </button>

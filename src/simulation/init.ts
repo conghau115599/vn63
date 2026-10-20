@@ -21,9 +21,13 @@ export function createLife(options: {
     currentMonth =
       start === "BIRTH" ? "2024-01" : start === "ADULT" ? "2052-01" : "2099-01";
   const state: GameState = {
-    careerDevelopment: initialCareer(start !== "BIRTH", options.strength),
+    careerDevelopment: initialCareer(
+      start !== "BIRTH",
+      options.strength,
+      options.seed,
+    ),
     schemaVersion: 3,
-    engineVersion: "1.3.0-alpha.1",
+    engineVersion: "1.3.0-alpha.2",
     context: {
       settlement: "URBAN",
       resources: "STABLE",

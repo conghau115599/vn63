@@ -1,5 +1,96 @@
 import { test, expect } from "@playwright/test";
 import { createLife } from "../../src/simulation/init";
+import { advanceMonth } from "../../src/simulation/core/advanceMonth";
+
+test("continuous clock follows 72 seconds per year, pauses, speeds up and stops for a choice", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date(Date.now() + 60000));
+  const fixture = createLife({ seed: "clock-baby" });
+  await page.goto("/");
+  await page.locator("input[type=file]").setInputFiles({
+    name: "clock.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(fixture)),
+  });
+  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
+  await page.clock.fastForward(5999);
+  await expect(
+    page.getByRole("heading", { name: /Tháng 01\/2024/ }),
+  ).toBeVisible();
+  await page.clock.fastForward(1);
+  await expect(
+    page.getByRole("heading", { name: /Tháng 02\/2024/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Tạm dừng", exact: true }).click();
+  await page.clock.fastForward(72000);
+  await expect(
+    page.getByRole("heading", { name: /Tháng 02\/2024/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "16×", exact: true }).click();
+  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
+  await page.clock.fastForward(375);
+  await expect(
+    page.getByRole("heading", { name: /Tháng 03\/2024/ }),
+  ).toBeVisible();
+  const senior = createLife({ seed: "clock-care", start: "SENIOR_CARE" });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "care.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(senior)),
+  });
+  await expect(
+    page.getByRole("heading", { name: /Tháng 01\/2099/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Tiếp tục", exact: true }).click();
+  await page.clock.fastForward(375);
+  const popup = page.getByRole("dialog");
+  await expect(popup.getByRole("heading")).toHaveText(
+    "Người bạn đời cần chăm sóc",
+  );
+  await popup.press("Escape");
+  await page.clock.fastForward(72000);
+  await expect(
+    page.getByRole("button", { name: "Tiếp tục", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("heading", { name: /Tháng 01\/2099/ }),
+  ).toBeVisible();
+});
+
+test("quiet months are grouped without losing the monthly archive", async ({
+  page,
+}) => {
+  let fixture = createLife({ seed: "quiet-year" });
+  for (let i = 0; i < 12; i++) {
+    let result = advanceMonth(fixture, { yearMonth: fixture.currentMonth });
+    while (result.status === "PAUSED") {
+      const state = result.nextState;
+      result = advanceMonth(state, {
+        yearMonth: state.currentMonth,
+        choice: {
+          eventId: state.pendingDecision!.id,
+          optionId: state
+            .pendingDecision!.options.filter((o) => !o.disabledReason)
+            .at(-1)!.id,
+        },
+      });
+    }
+    fixture = result.nextState;
+  }
+  await page.goto("/");
+  await page.locator("input[type=file]").setInputFiles({
+    name: "year.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(fixture)),
+  });
+  await expect(page.getByText(/\d+ tháng bình yên trôi qua/)).toBeVisible();
+  await page.getByRole("button", { name: "Xem sổ tháng & tổng kết →" }).click();
+  await expect(
+    page.getByText("12 tháng hoàn tất", { exact: true }),
+  ).toBeVisible();
+});
 test("prepared musician can request a trial, review a persisted offer and accept a contract", async ({
   page,
 }) => {
@@ -40,6 +131,7 @@ test("create, advance, reload, inspect finance, pause at decision and import/exp
   await page.getByLabel("Seed cuộc đời").fill("decision-0");
   await page.getByLabel("Điểm bắt đầu").selectOption("ADULT");
   await page.getByRole("button", { name: "Bắt đầu cuộc đời" }).click();
+  await page.getByRole("button", { name: "Tạm dừng", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Tháng 01/2052" }),
   ).toBeVisible();
@@ -172,6 +264,7 @@ test("senior care decision references an actual living spouse and keeps pause af
   await page.goto("/");
   await page.getByLabel("Điểm bắt đầu").selectOption("SENIOR_CARE");
   await page.getByRole("button", { name: "Bắt đầu cuộc đời" }).click();
+  await page.getByRole("button", { name: "Tạm dừng", exact: true }).click();
   await page.getByRole("button", { name: /^Sang tháng/ }).click();
   const decision = page.getByRole("region", { name: "Quyết định quan trọng" });
   await expect(decision.getByRole("heading")).toHaveText(

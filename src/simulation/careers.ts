@@ -29,15 +29,24 @@ export type CareerDevelopment = {
 export function initialCareer(
   adult = false,
   strength: "GENERAL" | Talent = "GENERAL",
+  seed?: string,
 ): CareerDevelopment {
+  const born = (goal: Talent) =>
+    seed === undefined
+      ? strength === goal
+        ? 85
+        : 60
+      : strength === goal
+        ? 85 + Math.floor(random(seed, "born-aptitude", goal) * 11)
+        : 30 + Math.floor(random(seed, "born-aptitude", goal) * 51);
   return {
     version: "talent-careers-v1",
     sourceGrade: "ASSUMPTION",
     goal: "GENERAL",
     hours: 0,
     aptitude: {
-      ATHLETE: strength === "ATHLETE" ? 85 : 60,
-      ARTIST: strength === "ARTIST" ? 85 : 60,
+      ATHLETE: born("ATHLETE"),
+      ARTIST: born("ARTIST"),
     },
     skill: {
       ATHLETE: adult ? (strength === "ATHLETE" ? 35 : 20) : 5,
@@ -51,6 +60,29 @@ export function initialCareer(
 }
 export const practiceLimit = (age: number) =>
   age < 6 ? 3 : age < 14 ? 8 : age < 18 ? 12 : 20;
+
+/** Fictional inherited potential and current foundation, never a real genetic assessment. */
+export function careerFit(s: GameState, goal: Talent) {
+  const c = s.careerDevelopment;
+  const foundation =
+    goal === "ATHLETE"
+      ? s.health * 0.8 + (100 - s.fatigue) * 0.2
+      : s.knowledge * 0.55 + s.mood * 0.25 + (100 - s.fatigue) * 0.2;
+  const support =
+    s.context.resources === "AFFLUENT"
+      ? 1.1
+      : s.context.resources === "LIMITED"
+        ? 0.9
+        : 1;
+  const potential = 65 + c.aptitude[goal] * 0.35;
+  const readiness =
+    c.skill[goal] * 0.6 +
+    c.aptitude[goal] * 0.15 +
+    Math.min(100, c.minutes[goal] / 360) * 0.13 +
+    foundation * 0.12 -
+    s.fatigue * 0.05;
+  return { foundation, support, potential, readiness };
+}
 export function careerRequirements(
   s: GameState,
   goal: Talent,
@@ -110,10 +142,7 @@ export function prepareCareer(s: GameState, plan?: CareerPlan) {
   else {
     // Practice itself supplies the evidence; a small seeded variation cannot erase strong preparation.
     const score =
-      c.skill[plan.goal] * 0.72 +
-      c.aptitude[plan.goal] * 0.15 +
-      Math.min(100, c.minutes[plan.goal] / 360) * 0.13 -
-      s.fatigue * 0.05 +
+      careerFit(s, plan.goal).readiness +
       (random(s.seed, "career-trial", `${s.currentMonth}/${plan.goal}`) - 0.5) *
         8;
     const passed = score >= 58;
@@ -130,19 +159,22 @@ export function developCareer(s: GameState, minutes: number) {
   const c = s.careerDevelopment;
   if (c.goal === "GENERAL") return;
   const goal = c.goal,
-    hours = minutes / 60;
+    hours = minutes / 60,
+    fit = careerFit(s, goal);
   c.minutes[goal] += minutes;
   const recovery =
     Math.max(0.25, 1 - s.fatigue / 130) *
     (goal === "ATHLETE" ? 0.5 + s.health / 200 : 1);
   c.skill[goal] = Math.min(
-    100,
+    Math.max(c.skill[goal], fit.potential),
     c.skill[goal] +
       Math.min(
         5,
         (hours / 16) *
           (0.5 + c.aptitude[goal] / 100) *
-          (1 - c.skill[goal] / 120) *
+          Math.max(0, 1 - c.skill[goal] / fit.potential) *
+          (0.65 + fit.foundation / 200) *
+          fit.support *
           recovery *
           (c.club[goal] ? 1.08 : 1),
       ),

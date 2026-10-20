@@ -4,7 +4,11 @@ import {
   advanceMonth,
   advanceMonths,
 } from "../src/simulation/core/advanceMonth";
-import { careerRequirements } from "../src/simulation/careers";
+import {
+  careerRequirements,
+  careerFit,
+  developCareer,
+} from "../src/simulation/careers";
 import { serialize, deserialize } from "../src/simulation/save";
 import type { GameState, MonthlyInput } from "../src/simulation/types";
 function finish(s: GameState, input: Partial<MonthlyInput> = {}) {
@@ -16,6 +20,63 @@ function finish(s: GameState, input: Partial<MonthlyInput> = {}) {
     });
   return r.nextState;
 }
+it("birth potential varies by seed, is reproducible and survives old-save loading", () => {
+  const born = createLife({ seed: "born-a" });
+  expect(createLife({ seed: "born-a" }).careerDevelopment.aptitude).toEqual(
+    born.careerDevelopment.aptitude,
+  );
+  const profiles = new Set(
+    Array.from({ length: 20 }, (_, i) =>
+      JSON.stringify(
+        createLife({ seed: `born-${i}` }).careerDevelopment.aptitude,
+      ),
+    ),
+  );
+  expect(profiles.size).toBeGreaterThan(10);
+  born.engineVersion = "1.3.0-alpha.1";
+  born.careerDevelopment.aptitude.ARTIST = 91;
+  expect(deserialize(serialize(born)).careerDevelopment.aptitude.ARTIST).toBe(
+    91,
+  );
+});
+it("foundation and access to learning change progress without awarding a job", () => {
+  const supported = createLife({
+    seed: "equal-potential",
+    start: "ADULT",
+    context: { resources: "AFFLUENT" },
+  });
+  const struggling = structuredClone(supported);
+  supported.careerDevelopment.goal = struggling.careerDevelopment.goal =
+    "ARTIST";
+  struggling.context.resources = "LIMITED";
+  struggling.knowledge = 10;
+  struggling.mood = 10;
+  developCareer(supported, 2400);
+  developCareer(struggling, 2400);
+  expect(supported.careerDevelopment.minutes.ARTIST).toBe(
+    struggling.careerDevelopment.minutes.ARTIST,
+  );
+  expect(supported.careerDevelopment.skill.ARTIST).toBeGreaterThan(
+    struggling.careerDevelopment.skill.ARTIST,
+  );
+  expect(careerFit(supported, "ARTIST").readiness).toBeGreaterThan(
+    careerFit(struggling, "ARTIST").readiness,
+  );
+  expect(supported.job?.occupation).toBeUndefined();
+});
+it("lower inherited potential can still reach a professional audition through practice", () => {
+  const s = createLife({ seed: "persistent", start: "ADULT" });
+  s.careerDevelopment.goal = "ARTIST";
+  s.careerDevelopment.aptitude.ARTIST = 30;
+  s.knowledge = 80;
+  s.fatigue = 0;
+  for (let i = 0; i < 120; i++) developCareer(s, 2400);
+  expect(careerRequirements(s, "ARTIST", "TRYOUT")).toEqual([]);
+  expect(careerFit(s, "ARTIST").readiness - 4).toBeGreaterThanOrEqual(58);
+  expect(s.careerDevelopment.skill.ARTIST).toBeLessThanOrEqual(
+    careerFit(s, "ARTIST").potential,
+  );
+});
 it("good health or musical aptitude alone does not grant a professional job", () => {
   for (const goal of ["ATHLETE", "ARTIST"] as const) {
     const s = createLife({
@@ -91,6 +152,7 @@ it("higher aptitude produces more skill from exactly the same time and seed", ()
 it("a failed trial explains the score, preserves progress and prevents monthly retry farming", () => {
   const s = createLife({ seed: "retry", start: "ADULT" });
   s.careerDevelopment.skill.ATHLETE = 50;
+  s.careerDevelopment.aptitude.ATHLETE = 30;
   s.careerDevelopment.minutes.ATHLETE = 18000;
   s.careerDevelopment.club.ATHLETE = true;
   const next = finish(s, {

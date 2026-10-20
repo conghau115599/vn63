@@ -278,7 +278,7 @@ const schema = legacySchema.extend({
     })
     .optional(),
   schemaVersion: z.literal(3),
-  engineVersion: z.literal("1.3.0-alpha.1"),
+  engineVersion: z.enum(["1.3.0-alpha.1", "1.3.0-alpha.2"]),
   eventPackVersion: z.literal("context-demo-v1"),
   context: z.object({
     settlement: z.enum(["URBAN", "RURAL"]),
