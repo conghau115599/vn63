@@ -13,13 +13,11 @@ test("prepared musician can request a trial, review a persisted offer and accept
   fixture.careerDevelopment.minutes.ARTIST = 36000;
   fixture.careerDevelopment.portfolio = 40;
   await page.goto("/");
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "career.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(fixture)),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "career.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(fixture)),
+  });
   await page.getByRole("button", { name: /^♫\s*Nghề mơ ước$/ }).click();
   await page
     .getByRole("button", { name: "Đăng ký tuyển chọn & sang tháng" })
@@ -87,14 +85,45 @@ test("critical decision persists and auto never chooses on behalf of the player"
   const region = page.getByRole("region", { name: "Quyết định quan trọng" });
   await expect(region).toBeVisible({ timeout: 30000 });
   const title = await region.getByRole("heading").textContent();
+  const popup = page.getByRole("dialog");
+  await expect(popup.getByRole("heading")).toBeFocused();
+  await popup.press("Escape");
+  await expect(popup).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Mở lựa chọn →" }),
+  ).toBeFocused();
   await expect(
     page.getByRole("button", { name: "Sang tháng", exact: false }),
   ).toBeDisabled();
   await expect(page.getByText("Đã lưu trên thiết bị")).toBeVisible();
   await page.reload();
   await expect(region.getByRole("heading")).toHaveText(title!);
+  await page.getByRole("button", { name: "Xem nhật ký ↓" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Nhật ký cuộc đời", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Mở lựa chọn →" }).click();
+  const chosen = await region
+    .getByRole("button")
+    .last()
+    .locator("b")
+    .textContent();
   await region.getByRole("button").last().click();
   await expect(region).not.toBeVisible();
+  await page.getByRole("button", { name: "Những lần tôi chọn" }).click();
+  const journal = page.getByRole("region", {
+    name: "Nhật ký cuộc đời",
+    exact: true,
+  });
+  await expect(journal.getByText("✓ Bạn đã chọn").first()).toBeVisible();
+  await expect(
+    journal.getByText(`${title}: ${chosen}.`, { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "Những lần tôi chọn" }).click();
+  await expect(
+    journal.getByText(`${title}: ${chosen}.`, { exact: true }),
+  ).toBeVisible();
 });
 
 test("validate a venture, launch with delayed invoices, reload and inspect both books", async ({

@@ -1,5 +1,11 @@
 # Changelog
 
+## Nhật ký & lựa chọn · 20/10/2026
+
+- Trang Cuộc đời ưu tiên nhật ký mới nhất, diễn biến tháng đang dừng và dấu vết lựa chọn thực; lọc lựa chọn, đọc thêm lịch sử.
+- Popup quyết định có nền mờ, phương án lớn, focus bàn phím, tạm gác/xem nhật ký và mở lại; reload vẫn chờ người chơi chọn.
+- Thu gọn cảnh, tiền và lịch sống dưới nhật ký; giữ engine và định dạng save. Chi tiết kiểm chứng trong docs/STORY_FIRST_UI.md.
+
 ## Dashboard refresh · 20/10/2026
 
 - Thay toàn bộ theme bằng dashboard ba cột theo ảnh tham khảo: hồ sơ/chỉ số bên trái, câu chuyện và quyết định giữa, người thân/mục tiêu/bản đồ tuổi bên phải.
