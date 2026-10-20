@@ -35,6 +35,25 @@ export function CareerPanel({
       <section className="panel">
         <p className="eyebrow">CHỦ ĐỘNG THEO ĐUỔI MỘT NGHỀ</p>
         <h2>Từ nền tảng đến hợp đồng đầu tiên</h2>
+        <ol className="career-steps" aria-label="Các bước vào nghề">
+          {[
+            { label: "Luyện tập", done: c.minutes[goal] > 0 },
+            {
+              label: goal === "ATHLETE" ? "Câu lạc bộ" : "Hồ sơ biểu diễn",
+              done: goal === "ATHLETE" ? c.club.ATHLETE : c.portfolio >= 20,
+            },
+            {
+              label: "Đạt tuyển chọn",
+              done: c.trials.some((t) => t.goal === goal && t.passed),
+            },
+            { label: "Hợp đồng", done: game.job?.occupation === goal },
+          ].map((step, i) => (
+            <li className={step.done ? "complete" : ""} key={step.label}>
+              <span>{step.done ? "✓" : `0${i + 1}`}</span>
+              <b>{step.label}</b>
+            </li>
+          ))}
+        </ol>
         <p>
           Luyện tập → câu lạc bộ / hồ sơ biểu diễn → tuyển chọn → hợp đồng. Bạn
           chủ động đăng ký khi đủ điều kiện, không phải chờ sự kiện hiếm.
@@ -105,10 +124,46 @@ export function CareerPanel({
         <h2>
           {goal === "ATHLETE" ? "Lộ trình thể thao" : "Lộ trình biểu diễn"}
         </h2>
-        <p>
-          Năng khiếu {c.aptitude[goal]}/100 · kỹ năng {c.skill[goal].toFixed(1)}
-          /100 · đã luyện {(c.minutes[goal] / 60).toFixed(1)} giờ.
-        </p>
+        <div className="career-metrics">
+          {[
+            {
+              label: "Kỹ năng",
+              value: c.skill[goal],
+              target: 50,
+              unit: "điểm",
+            },
+            {
+              label: "Giờ đã luyện",
+              value: c.minutes[goal] / 60,
+              target: 300,
+              unit: "giờ",
+            },
+            {
+              label: "Năng khiếu",
+              value: c.aptitude[goal],
+              target: 100,
+              unit: "điểm",
+            },
+          ].map((metric) => (
+            <div key={metric.label}>
+              <span>{metric.label}</span>
+              <strong>
+                {metric.value.toFixed(1)}
+                <small> / {metric.target}</small>
+              </strong>
+              <progress
+                aria-label={metric.label}
+                value={Math.min(metric.value, metric.target)}
+                max={metric.target}
+              />
+              <small>
+                {metric.label === "Năng khiếu"
+                  ? "Hỗ trợ tốc độ học"
+                  : `Mốc dự tuyển: ${metric.target} ${metric.unit}`}
+              </small>
+            </div>
+          ))}
+        </div>
         {goal === "ARTIST" && (
           <p>
             Hồ sơ biểu diễn: {c.portfolio.toFixed(1)} / 20 điểm để dự tuyển.

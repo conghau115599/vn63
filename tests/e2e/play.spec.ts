@@ -143,7 +143,7 @@ test("senior care decision references an actual living spouse and keeps pause af
   await page.goto("/");
   await page.getByLabel("Điểm bắt đầu").selectOption("SENIOR_CARE");
   await page.getByRole("button", { name: "Bắt đầu cuộc đời" }).click();
-  await page.getByRole("button", { name: "Sang tháng →", exact: true }).click();
+  await page.getByRole("button", { name: /^Sang tháng/ }).click();
   const decision = page.getByRole("region", { name: "Quyết định quan trọng" });
   await expect(decision.getByRole("heading")).toHaveText(
     "Người bạn đời cần chăm sóc",

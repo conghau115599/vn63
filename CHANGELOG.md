@@ -1,5 +1,12 @@
 # Changelog
 
+## Dashboard refresh · 20/10/2026
+
+- Thay toàn bộ theme bằng dashboard ba cột theo ảnh tham khảo: hồ sơ/chỉ số bên trái, câu chuyện và quyết định giữa, người thân/mục tiêu/bản đồ tuổi bên phải.
+- Tab ngang có nhãn, thanh thời gian sticky ở trên, tương phản và font nhất quán, khung cảnh SVG pixel riêng theo đô thị/nông thôn.
+- Thiết kế lại setup, tài chính, kinh doanh, nghề nghiệp, gia đình, nhật ký và inspector. Lộ trình nghề có các bước và progress thực từ save.
+- Mobile một cột, hồ sơ mở/thu gọn, không có playback phủ nội dung ở đáy; chuyển tab trở về đầu trang. Không thay engine, save schema hoặc công thức mô phỏng.
+
 ## 0.2.0 · v1.3 Dynamic Branches + Causal Startups · 20/10/2026
 
 - Event contracts và eligibility/debug reasons theo context, actor, hợp đồng, resources, prior events/arc, cooldown và memory.

@@ -38,6 +38,8 @@ Business cohort chạy 10.000 doanh nghiệp **mỗi cấu hình**: 2 mode ×3 c
 
 ## Tính năng v1.3
 
+Giao diện dashboard ba cột, lấy hướng bố cục từ ảnh tham khảo người chơi cung cấp: hồ sơ và chỉ số, câu chuyện và lựa chọn, người thân và bản đồ cuộc đời. Tab có tên đầy đủ; thanh thời gian nằm trên và ghim khi cuộn. Trên điện thoại chuyển sang một cột và có thể mở/thu gọn hồ sơ.
+
 - Eligibility có lý do: actor, agency, hợp đồng, flags, nguồn lực, history, arc và cooldown. Không khóa tính cách tuổi 3/5 hoặc bắt mọi người nghỉ hưu ở 65.
 - Sáu trait thay đổi chậm từ thói quen thực; NPC nhớ lời hứa, quà không xóa thất hứa.
 - Nghề mơ ước: chủ động luyện thể thao/âm nhạc, tham gia câu lạc bộ, tạo hồ sơ biểu diễn, dự tuyển và duyệt hợp đồng. Năng khiếu tăng tốc học; yêu cầu còn thiếu hiện rõ. Vào nghề tách khỏi nổi tiếng; chưa có fame simulation.
