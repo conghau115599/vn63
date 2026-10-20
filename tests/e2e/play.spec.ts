@@ -225,6 +225,7 @@ test("validate a venture, launch with delayed invoices, reload and inspect both 
   await page.getByLabel("Điểm bắt đầu").selectOption("ADULT");
   await page.getByLabel("Seed cuộc đời").fill("decision-1");
   await page.getByRole("button", { name: "Bắt đầu cuộc đời" }).click();
+  await page.getByRole("button", { name: "Tạm dừng", exact: true }).click();
   await page.getByRole("button", { name: /^⌂\s*Kinh doanh$/ }).click();
   await page.getByRole("button", { name: /Nghiên cứu ý tưởng/ }).click();
   const decision = page.getByRole("region", { name: "Quyết định quan trọng" });

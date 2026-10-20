@@ -142,6 +142,7 @@ export default function Home() {
     );
   const [asset, setAsset] = useState("fund"),
     [quantity, setQuantity] = useState("1");
+  const [savedSnapshot, setSavedSnapshot] = useState<GameState | null>(null);
   const upload = useRef<HTMLInputElement>(null),
     queue = useRef(Promise.resolve()),
     saveRevision = useRef(0);
@@ -166,8 +167,10 @@ export default function Home() {
       .catch(() => {})
       .then(() => saveGame(game))
       .then(() => {
-        if (revision === saveRevision.current)
+        if (revision === saveRevision.current) {
+          setSavedSnapshot(game);
           setNotice("Đã lưu trên thiết bị");
+        }
       })
       .catch((e) => setError(`Lưu thất bại: ${e.message}`));
   }, [game, ready]);
@@ -691,7 +694,7 @@ export default function Home() {
                   </div>
                   <div className="save-note" role="status" aria-live="polite">
                     <span className="save-dot" />
-                    {notice || "Đang lưu…"}
+                    {savedSnapshot === game ? notice : "Đang lưu…"}
                     <small>Seed: {game.seed}</small>
                   </div>
                 </section>
