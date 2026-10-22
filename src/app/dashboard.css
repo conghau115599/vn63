@@ -2714,3 +2714,64 @@ body:has(.choice-dialog[open]) {
     animation: none;
   }
 }
+/* Four management groups; the journal stays the main play surface. */
+.more-menu {
+  position: relative;
+  font-size: 11px;
+  color: #426763;
+}
+.more-menu > summary {
+  cursor: pointer;
+  padding: 8px;
+}
+.more-menu[open] {
+  z-index: 35;
+}
+.more-menu[open] > button {
+  display: block;
+  min-width: 200px;
+  width: 100%;
+  text-align: left;
+  padding: 9px;
+  background: #f7faf4;
+  border: 1px solid #c5d5ca;
+}
+.context-notice {
+  padding: 12px 15px;
+  background: #f4f2e7;
+  border-left: 3px solid #ab9566;
+  color: #72664b;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.current-date {
+  font-size: 11px;
+  color: #647c70;
+}
+.current-date time {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d6157;
+}
+.activity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+.activity-grid button[aria-pressed="true"] {
+  background: #dcebdc;
+  border-color: #57957a;
+}
+@media (max-width: 768px) {
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+  .top-actions {
+    gap: 6px;
+  }
+  .context-notice {
+    padding: 10px;
+    font-size: 10px;
+  }
+}

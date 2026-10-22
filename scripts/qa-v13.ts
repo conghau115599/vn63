@@ -218,6 +218,7 @@ for (const scenario of [
   },
 ]) {
   let s = createLife({
+    legacyDemo: true,
     seed: "contrasting-story",
     start: scenario.start,
     context: { settlement: scenario.settlement, resources: scenario.resources },

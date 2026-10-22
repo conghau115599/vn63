@@ -6,6 +6,7 @@ import {
   monthsBetween,
   nextMonth,
   parseMonth,
+  addDays,
 } from "../calendar/YearMonth";
 import { resolveSchedule, schedules } from "../time/MonthlySchedule";
 import {
@@ -27,6 +28,13 @@ import {
 import { checkConditions, contextKey, relationOf } from "../events/eligibility";
 import { evolvePersonality } from "../personality";
 import { prepareCareer, developCareer } from "../careers";
+import {
+  decisionRoute,
+  ensureGuardian,
+  guardianOption,
+} from "../decisions/orchestrator";
+import { applyActivityToSchedule } from "../activities";
+import { worldContext } from "../world/contracts";
 
 const clamp = (v: number) => Math.max(0, Math.min(100, v));
 function log(
@@ -476,6 +484,7 @@ function applyOrders(s: GameState, input: MonthlyInput) {
 export function advanceMonth(
   state: GameState,
   input: MonthlyInput,
+  throughDay?: number,
 ): MonthlyResult {
   parseMonth(input.yearMonth);
   if (!state.living) throw new Error("Cuộc đời đã kết thúc.");
@@ -494,6 +503,49 @@ export function advanceMonth(
         ),
       ),
     );
+  if (
+    throughDay !== undefined &&
+    (!Number.isInteger(throughDay) || throughDay < 1 || throughDay > n)
+  )
+    throw new Error("Giới hạn ngày không hợp lệ.");
+  const economyReady = worldContext(s).economyReady;
+  if (throughDay === undefined && s.calendarMode) s.weeklyCursor = undefined;
+  if (
+    input.policyChanges?.length &&
+    ageOn(
+      s.birthDate,
+      s.currentDate ?? dateInMonth(month, s.cursor?.day ?? 1),
+    ) < 18
+  )
+    throw new Error(
+      "Lịch công việc của người trưởng thành chưa phù hợp độ tuổi.",
+    );
+  if (
+    !economyReady &&
+    (input.startBusiness ||
+      input.business ||
+      input.careerAction ||
+      input.investmentOrders?.length ||
+      input.giftNpcId ||
+      input.careerPlan?.action)
+  )
+    throw new Error(
+      "Chưa có dữ liệu nghề/tiền tệ theo niên đại; nghiệp vụ này chưa mở trong nền lịch sử.",
+    );
+  if (
+    input.choice &&
+    s.pendingDecision &&
+    decisionRoute(s, s.pendingDecision) === "GUARDIAN"
+  )
+    throw new Error("Quyết định này thuộc người giám hộ.");
+  ensureGuardian(
+    s,
+    dateInMonth(
+      month,
+      s.cursor?.day ??
+        (month === s.birthDate.slice(0, 7) ? +s.birthDate.slice(8) : 1),
+    ),
+  );
   if (
     s.cursor &&
     (input.startBusiness ||
@@ -609,7 +661,15 @@ export function advanceMonth(
         "Lịch không khả thi. Hãy giảm cam kết trước khi tiếp tục.",
       );
     s.cursor = {
-      day: month === s.birthDate.slice(0, 7) ? +s.birthDate.slice(8) : 1,
+      day:
+        s.currentDate?.slice(0, 7) === month
+          ? +s.currentDate.slice(8)
+          : month === s.birthDate.slice(0, 7)
+            ? +s.birthDate.slice(8)
+            : 1,
+      ...(s.calendarMode
+        ? { startDay: s.currentDate ? +s.currentDate.slice(8) : 1 }
+        : {}),
       openingCashVnd: s.cashVnd,
       inflowVnd: "0",
       outflowVnd: "0",
@@ -620,6 +680,7 @@ export function advanceMonth(
       businessInput: planned,
       businessFundingVnd: "0",
     };
+    applyActivityToSchedule(s, s.cursor.day);
     if (input.careerPlan?.action) {
       const trial = s.careerDevelopment.trials.at(-1);
       log(
@@ -698,23 +759,44 @@ export function advanceMonth(
       );
     }
     applyOrders(s, input);
-    updateMarket(s);
+    if (economyReady) updateMarket(s);
     s.cursor.marketUpdated = true;
   }
   if (s.pendingDecision) {
-    if (!input.choice) return result(s, "PAUSED");
-    if (input.choice.eventId !== s.pendingDecision.id)
-      throw new Error("Quyết định không khớp.");
-    choice(s, input.choice.optionId);
+    if (decisionRoute(s, s.pendingDecision) === "GUARDIAN") {
+      const title = s.pendingDecision.title,
+        date = s.pendingDecision.date,
+        id = s.pendingDecision.id;
+      choice(s, guardianOption(s, s.pendingDecision));
+      log(
+        s,
+        `${id}/guardian`,
+        date,
+        "guardian",
+        `Người giám hộ thu xếp: ${title.toLowerCase()}. Bạn được gia đình chăm sóc theo hoàn cảnh.`,
+      );
+    } else {
+      if (!input.choice) return result(s, "PAUSED");
+      if (input.choice.eventId !== s.pendingDecision.id)
+        throw new Error("Quyết định không khớp.");
+      choice(s, input.choice.optionId);
+    }
   } else if (input.choice) throw new Error("Không có quyết định đang chờ.");
-  const candidate = eventForMonth(s),
+  const candidate = Object.hasOwn(s.cursor, "eventTemplateId")
+      ? templates.find((t) => t.id === s.cursor!.eventTemplateId)
+      : eventForMonth(s),
     deathThisMonth =
       monthsBetween(s.birthDate.slice(0, 7), month) >= s.deathLimitMonths,
     finalDay = deathThisMonth ? 15 : n;
+  if (s.calendarMode) s.cursor.eventTemplateId = candidate?.id ?? null;
   for (; s.cursor.day <= finalDay; s.cursor.day++) {
     const day = s.cursor.day,
       date = dateInMonth(month, day),
       prefix = `${s.lifeId}/${month}`;
+    if (throughDay !== undefined && day > throughDay) {
+      if (s.calendarMode) s.currentDate = date;
+      return result(s, "IN_PROGRESS");
+    }
     if (
       day === 12 &&
       (candidate || s.careerDevelopment.offer) &&
@@ -744,7 +826,19 @@ export function advanceMonth(
             ],
           }
         : makeDecision(s, candidate!);
-      return result(s, "PAUSED");
+      if (s.calendarMode) s.currentDate = date;
+      if (decisionRoute(s, s.pendingDecision) === "GUARDIAN") {
+        const title = s.pendingDecision.title,
+          id = s.pendingDecision.id;
+        choice(s, guardianOption(s, s.pendingDecision));
+        log(
+          s,
+          `${id}/guardian`,
+          date,
+          "guardian",
+          `Người giám hộ thu xếp: ${title.toLowerCase()}. Bạn được gia đình chăm sóc theo hoàn cảnh.`,
+        );
+      } else return result(s, "PAUSED");
     }
     if (day === 1) {
       for (const c of s.consequences.filter(
@@ -795,7 +889,7 @@ export function advanceMonth(
       );
       s.wageReceivableVnd = "0";
     }
-    if (startAge >= 18) {
+    if (economyReady && ageOn(s.birthDate, date) >= 18) {
       const rent = s.residenceProvinceId === "da-nang" ? 2800000n : 3000000n;
       const totalEssentials =
         rent + (s.mode === "HARDSHIP" ? 5500000n : 4500000n);
@@ -882,7 +976,8 @@ export function advanceMonth(
     }
   }
   const activeStart =
-    month === s.birthDate.slice(0, 7) ? +s.birthDate.slice(8) : 1;
+    s.cursor.startDay ??
+    (month === s.birthDate.slice(0, 7) ? +s.birthDate.slice(8) : 1);
   for (const k of Object.keys(s.cursor.time.byCategory) as Array<
     keyof typeof s.cursor.time.byCategory
   >)
@@ -893,6 +988,7 @@ export function advanceMonth(
     (a, b) => a + b,
     0,
   );
+  s.cursor.time.availableMinutes = (finalDay - activeStart + 1) * 1440;
   if (s.business) {
     const businessResult = advanceBusinessMonth(
       s.business,
@@ -1006,6 +1102,8 @@ export function advanceMonth(
   }
   s.cursor = undefined;
   if (s.living) s.currentMonth = nextMonth(month);
+  if (s.calendarMode)
+    s.currentDate = s.deathDate ?? addDays(dateInMonth(month, finalDay), 1);
   if (
     amount(report.cashOpenVnd) +
       amount(report.inflowVnd) -

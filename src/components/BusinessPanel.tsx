@@ -1,4 +1,5 @@
 "use client";
+import { formatDate } from "../simulation/calendar/YearMonth";
 import { useState } from "react";
 import type { GameState, MonthlyInput } from "../simulation/types";
 import type { BusinessMonthInput } from "../simulation/business/types";
@@ -325,9 +326,9 @@ export function BusinessPanel({
             </p>
           ))}
           <p className="fine">
-            Kỹ năng vận hành {b.founderSkill.operations.toFixed(1)} · bán hàng{" "}
-            {b.founderSkill.sales.toFixed(1)} · uy tín {b.goodwill.toFixed(1)}.
-            Chưa hiệu chuẩn theo dữ liệu kinh doanh Việt Nam.
+            Kỹ năng vận hành {Math.round(b.founderSkill.operations)} · bán hàng{" "}
+            {Math.round(b.founderSkill.sales)} · uy tín {Math.round(b.goodwill)}
+            . Chưa hiệu chuẩn theo dữ liệu kinh doanh Việt Nam.
           </p>
         </section>
         <section className="panel">
@@ -385,7 +386,9 @@ export function BusinessPanel({
               <span>{money(e.wageVnd)}/tháng</span>
               <small>
                 {e.hoursPerWeek} giờ/tuần ·{" "}
-                {e.endDate ? `Kết thúc ${e.endDate}` : `Bắt đầu ${e.startDate}`}
+                {e.endDate
+                  ? `Kết thúc ${formatDate(e.endDate)}`
+                  : `Bắt đầu ${formatDate(e.startDate)}`}
               </small>
               {!e.endDate && (
                 <button

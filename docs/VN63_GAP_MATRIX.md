@@ -19,26 +19,26 @@ ZIP v1.7 do chủ dự án cung cấp đã đọc README, hướng dẫn thay đ
 
 ## Ma trận canon → khoảng cách → dependency / kiểm chứng
 
-| Canon | Hiện có | Khoảng cách / hành động | Phase / test |
-|---|---|---|---|
-| DOB seeded 1975, không viết lại save | Fixed 2024 | DOB/ngày hiện tại; chỉ game mới đổi default; giữ fixture legacy riêng | P1; nhiều seed/ngày nhuận/save |
-| 1s ≈ 7 ngày, tháng Gregorian | Vòng ngày trong tick tháng | Horizon theo ngày, weekly target lưu được khi pause; cả batch/seek dùng cùng transition | P1; 1×/16×/seek parity, leap/year/month boundaries |
-| Quyết toán tháng exactly once | Ledger và monthly report | Giữ ledger theo ngày đến hạn, chỉ commit report/business khi đóng tháng; không giả 4 tuần/tháng | P1; so với monthly legacy, bank/AR/AP/interest invariants |
-| 0–4 zero player decisions | Popup authority caregiver | Orchestrator để NPC giám hộ giải quyết, nhật ký có actor; chặn API chủ động | P1; seed/property, legacy pending recovery |
-| 5+ hoạt động theo hoàn cảnh | Policies cố định, practice | Hoạt động theo tuổi/nguồn lực; đổi phần lịch chưa xử lý, không sửa quá khứ | P1; đúng sinh nhật, phút ≤168h và persistence |
-| 4 nhóm + journal, tiếng Việt | 8 tabs | Sự nghiệp/Tài chính/Quan hệ/Bản thân; business dưới Sự nghiệp, debug trong Xem thêm | P1; desktop/mobile, accessible popup |
-| WorldContext/provenance/cutoff | Demo version strings | Contracts dùng chung; thiếu pack thật trả MISSING, không hardcode năm tương lai | P1 contracts → P2 content; validation/cutoff/pinning |
-| Admin date-aware, stable geo | 63 names 2024 only | Chưa xác minh mapping từng vùng/ngày 1975, snapshot 1976/2025 | P2 BLOCKED DATA; 38/63/34 + không đổi quê |
-| Monetary epochs và conversion | Chỉ VND demo | Thiếu văn bản/quy tắc cash/deposit/debt từng thời kỳ | P2 BLOCKED DATA; không auto nhân tỷ lệ hay áp lương hiện đại cho 1975 |
-| Nghề/luật/đầu tư theo niên đại | 2 talent + generic job/2 business sectors | Cần availability/occupation/monetary packs; 208/81 catalog prototype không có nguồn đủ | P2/P5; date gates + salary/slot audit |
-| Province identity 8 pilot→63 | Taxonomy only | Nguồn sector/cost/culture/exposure theo năm; không province→personality | P3/P8; sourced differential cohorts |
-| NPC identity/guardian graph | 2–3 demo NPC, bond/trust/promises | P1 chỉ giám hộ nhất quán và danh tính sơ bộ; genealogy/household/offscreen/marriage/children chưa có | P4; graph 10k, no double transfer, consent |
-| Multi-path breakthrough/legacy | Hợp đồng 6 tháng | CEO/scientist/competition/fame/contribution chưa có | P5; no teleport, vacancies/records/setbacks |
-| Fact history vs personal exposure | Mọi event ASSUMPTION | Verified facts, cutoff/exposure và source reviews chưa có | P2/P6; fixed facts every seed, no duplicate history |
-| Disease/mortality calibrated | Terminal age 76–95 demo; NPC 96 | Không bảng hazard, disease treatment, calibration | P6 BLOCKED DATA; không quảng cáo thống kê/tăng tử vong HARDSHIP |
-| Future causal world | Seeded monthly market demo | Chưa world latent state/quarterly causal generator/history | P7; pack cutover, no retroactive rewrite |
-| Migration/recovery/replay | v1.2/v1.3 JSON | Additive weekly metadata + backup; HTML importer vẫn không hỗ trợ | P1/P9; old pending/cash/NPC/history preserved |
-| Full life 1975→future | Demo full life | Tick đầy đủ chạy được không đồng nghĩa lịch sử/tiền tệ/xã hội đã đủ | P9 overall acceptance; chưa đạt |
+| Canon                                | Hiện có                                   | Khoảng cách / hành động                                                                              | Phase / test                                                          |
+| ------------------------------------ | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| DOB seeded 1975, không viết lại save | Fixed 2024                                | DOB/ngày hiện tại; chỉ game mới đổi default; giữ fixture legacy riêng                                | P1; nhiều seed/ngày nhuận/save                                        |
+| 1s ≈ 7 ngày, tháng Gregorian         | Vòng ngày trong tick tháng                | Horizon theo ngày, weekly target lưu được khi pause; cả batch/seek dùng cùng transition              | P1; 1×/16×/seek parity, leap/year/month boundaries                    |
+| Quyết toán tháng exactly once        | Ledger và monthly report                  | Giữ ledger theo ngày đến hạn, chỉ commit report/business khi đóng tháng; không giả 4 tuần/tháng      | P1; so với monthly legacy, bank/AR/AP/interest invariants             |
+| 0–4 zero player decisions            | Popup authority caregiver                 | Orchestrator để NPC giám hộ giải quyết, nhật ký có actor; chặn API chủ động                          | P1; seed/property, legacy pending recovery                            |
+| 5+ hoạt động theo hoàn cảnh          | Policies cố định, practice                | Hoạt động theo tuổi/nguồn lực; đổi phần lịch chưa xử lý, không sửa quá khứ                           | P1; đúng sinh nhật, phút ≤168h và persistence                         |
+| 4 nhóm + journal, tiếng Việt         | 8 tabs                                    | Sự nghiệp/Tài chính/Quan hệ/Bản thân; business dưới Sự nghiệp, debug trong Xem thêm                  | P1; desktop/mobile, accessible popup                                  |
+| WorldContext/provenance/cutoff       | Demo version strings                      | Contracts dùng chung; thiếu pack thật trả MISSING, không hardcode năm tương lai                      | P1 contracts → P2 content; validation/cutoff/pinning                  |
+| Admin date-aware, stable geo         | 63 names 2024 only                        | Chưa xác minh mapping từng vùng/ngày 1975, snapshot 1976/2025                                        | P2 BLOCKED DATA; 38/63/34 + không đổi quê                             |
+| Monetary epochs và conversion        | Chỉ VND demo                              | Thiếu văn bản/quy tắc cash/deposit/debt từng thời kỳ                                                 | P2 BLOCKED DATA; không auto nhân tỷ lệ hay áp lương hiện đại cho 1975 |
+| Nghề/luật/đầu tư theo niên đại       | 2 talent + generic job/2 business sectors | Cần availability/occupation/monetary packs; 208/81 catalog prototype không có nguồn đủ               | P2/P5; date gates + salary/slot audit                                 |
+| Province identity 8 pilot→63         | Taxonomy only                             | Nguồn sector/cost/culture/exposure theo năm; không province→personality                              | P3/P8; sourced differential cohorts                                   |
+| NPC identity/guardian graph          | 2–3 demo NPC, bond/trust/promises         | P1 chỉ giám hộ nhất quán và danh tính sơ bộ; genealogy/household/offscreen/marriage/children chưa có | P4; graph 10k, no double transfer, consent                            |
+| Multi-path breakthrough/legacy       | Hợp đồng 6 tháng                          | CEO/scientist/competition/fame/contribution chưa có                                                  | P5; no teleport, vacancies/records/setbacks                           |
+| Fact history vs personal exposure    | Mọi event ASSUMPTION                      | Verified facts, cutoff/exposure và source reviews chưa có                                            | P2/P6; fixed facts every seed, no duplicate history                   |
+| Disease/mortality calibrated         | Terminal age 76–95 demo; NPC 96           | Không bảng hazard, disease treatment, calibration                                                    | P6 BLOCKED DATA; không quảng cáo thống kê/tăng tử vong HARDSHIP       |
+| Future causal world                  | Seeded monthly market demo                | Chưa world latent state/quarterly causal generator/history                                           | P7; pack cutover, no retroactive rewrite                              |
+| Migration/recovery/replay            | v1.2/v1.3 JSON                            | Additive weekly metadata + backup; HTML importer vẫn không hỗ trợ                                    | P1/P9; old pending/cash/NPC/history preserved                         |
+| Full life 1975→future                | Demo full life                            | Tick đầy đủ chạy được không đồng nghĩa lịch sử/tiền tệ/xã hội đã đủ                                  | P9 overall acceptance; chưa đạt                                       |
 
 ## Quyết định kỹ thuật và rủi ro
 
@@ -46,7 +46,7 @@ ZIP v1.7 do chủ dự án cung cấp đã đọc README, hướng dẫn thay đ
 2. **Bảo toàn legacy**: fixtures 2024 và save v1.2/v1.3 không bị dời về 1975, không reroll RNG/NPC, không chuyển số dư sang đơn vị giả. Nhánh mới chỉ push PR; main không bị thay.
 3. **1975 trước dữ liệu P2**: default ngày sinh mới 1975 trong chế độ nền lịch sử có nhãn dữ liệu còn thiếu. Không hiển thị tên tỉnh 2024 như tên năm 1975, không áp 7,5 triệu VND/tháng/lương hiện đại/đổi tiền tự chế. Các nghiệp vụ cần dữ liệu chưa có bị khóa với lý do rõ; demo hiện đại còn trong kịch bản QA riêng. Đây là giới hạn P1, không phải triển khai P2.
 4. **Daily vs monthly**: lương/nghĩa vụ theo ngày hợp đồng hiện có, sổ tổng kết và business chỉ đóng cuối tháng. Week qua ranh giới có thể đóng một tháng rồi bắt đầu tháng khác; không dồn 4 tuần thành tháng hoặc chạy monthly settlement hai lần.
-5. **Mid-month actions**: đầu tư/business vẫn theo hợp đồng đầu tháng; UI thông báo thời điểm. Hoạt động cá nhân được áp vào các ngày chưa xử lý; không viết lại tháng/ledger đã qua.
+5. **Mid-month actions**: đầu tư/business vẫn theo hợp đồng đầu tháng; UI thông báo thời điểm. Thói quen cá nhân chọn từ đúng sinh nhật 5; nếu tháng đã mở thì áp từ đầu tháng sau. Không viết lại lịch/ledger đã qua.
 6. **Nguồn**: P1 không tuyên bố xác minh các URL trong tài liệu; chúng là source-to-verify cho P2. No numeric history fixtures = không bịa thống kê. Cutoff null không được coi là verified/future facts.
 7. **Hiệu năng**: giữ lịch ngày và cap batch; benchmark/smoke lưu thời gian thực. Không spawn hàng triệu NPC. Giao diện debug ẩn nhưng còn truy cập để kiểm toán.
 

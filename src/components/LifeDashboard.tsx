@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { simulationDate, worldContext } from "../simulation/world/contracts";
 import type { GameState } from "../simulation/types";
 import { ageOn } from "../simulation/calendar/YearMonth";
 
@@ -141,7 +142,7 @@ export function ProfileRail({
           </div>
           <div>
             <dt>Chế độ</dt>
-            <dd>{game.mode}</dd>
+            <dd>{game.mode === "REALISM" ? "Thực tế" : "Khắc nghiệt"}</dd>
           </div>
         </dl>
         <div className="profile-footer">
@@ -188,16 +189,25 @@ export function ProfileRail({
       </section>
       <section className="panel wallet-card">
         <p className="eyebrow">KHOẢNG THỞ TÀI CHÍNH</p>
-        <span>Tiền mặt hiện có</span>
-        <strong>{currency(game.cashVnd)}</strong>
-        <p>
-          Thu tháng trước{" "}
-          <b>{currency(game.reports.at(-1)?.inflowVnd ?? "0")}</b>
-        </p>
-        <p>
-          Chi tháng trước{" "}
-          <b>{currency(game.reports.at(-1)?.outflowVnd ?? "0")}</b>
-        </p>
+        {worldContext(game).economyReady ? (
+          <>
+            <span>Tiền mặt hiện có</span>
+            <strong>{currency(game.cashVnd)}</strong>
+            <p>
+              Thu tháng trước{" "}
+              <b>{currency(game.reports.at(-1)?.inflowVnd ?? "0")}</b>
+            </p>
+            <p>
+              Chi tháng trước{" "}
+              <b>{currency(game.reports.at(-1)?.outflowVnd ?? "0")}</b>
+            </p>
+          </>
+        ) : (
+          <p>
+            Đơn vị tiền và giá theo thời kỳ đang bổ sung. Chưa hiển thị số tiền
+            hiện đại.
+          </p>
+        )}
       </section>
     </aside>
   );
@@ -366,7 +376,7 @@ export function WorldRail({
   age: number;
   onNavigate: (tab: "family" | "career" | "journal" | "business") => void;
 }) {
-  const date = game.deathDate ?? `${game.currentMonth}-01`,
+  const date = simulationDate(game),
     people = game.npcs.filter((n) => n.living && n.birthDate <= date);
   const recorded = new Set(game.reports.map((r) => r.age));
   return (
@@ -467,7 +477,7 @@ export function WorldRail({
         <p>
           Không cần vội. Tự động sẽ dừng khi có quyết định cần bạn lựa chọn.
         </p>
-        <span>VN63 · Monthly v1.3 · Alpha</span>
+        <span>VN63 · Nền tảng lịch sử · Thử nghiệm</span>
       </section>
     </aside>
   );

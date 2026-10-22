@@ -33,7 +33,20 @@ const context = (b: BusinessState, month: string, hours = 35) => ({
   ownerMinutes: (hours * 60 * daysInMonth(month)) / 7,
 });
 describe("causal monthly business accounting", () => {
-  it('rejects skipped monthly operations and keeps capital transfer receipts without full history',()=>{let b=active();const once=injectOwnerCapital(b,'1000000','2052-01-01','top-up'),again=injectOwnerCapital(once,'1000000','2052-01-01','top-up');expect(again).toEqual(once);b=advanceBusinessMonth(b,{yearMonth:'2052-01'},context(b,'2052-01')).nextState;expect(()=>advanceBusinessMonth(b,{yearMonth:'2052-03'},context(b,'2052-03'))).toThrow(/trung gian/);});
+  it("rejects skipped monthly operations and keeps capital transfer receipts without full history", () => {
+    let b = active();
+    const once = injectOwnerCapital(b, "1000000", "2052-01-01", "top-up"),
+      again = injectOwnerCapital(once, "1000000", "2052-01-01", "top-up");
+    expect(again).toEqual(once);
+    b = advanceBusinessMonth(
+      b,
+      { yearMonth: "2052-01" },
+      context(b, "2052-01"),
+    ).nextState;
+    expect(() =>
+      advanceBusinessMonth(b, { yearMonth: "2052-03" }, context(b, "2052-03")),
+    ).toThrow(/trung gian/);
+  });
   it("requires validation, pays real setup costs, and preserves pure input", () => {
     let b = createBusiness({
       id: "startup",

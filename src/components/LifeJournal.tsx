@@ -280,7 +280,7 @@ export function LifeJournal({
           <p>
             {filter === "choices"
               ? "Mỗi quyết định đã đưa ra sẽ được ghi lại ở đây."
-              : `${game.name} đang sống tại Việt Nam. Chọn “Sang tháng” để dõi theo những điều tiếp theo.`}
+              : `Ngày ${game.birthDate.split("-").reverse().join("/")}, ${game.name} chào đời. Những người thân đang ở bên bạn. Chọn “Qua một tuần” để dõi theo câu chuyện.`}
           </p>
         </div>
       )}

@@ -8,11 +8,12 @@ const args = Object.fromEntries(
   process.argv.slice(2).map((v) => v.replace(/^--/, "").split("=")),
 );
 const count = Number(args.count ?? 1000),
-  offset=Number(args.offset??0),
+  offset = Number(args.offset ?? 0),
   output = args.output ?? "qa-results/simulation.json";
 if (!Number.isInteger(count) || count < 1 || count > 1000000)
   throw new Error("count must be 1–1,000,000");
-if(!Number.isInteger(offset)||offset<0)throw new Error('Invalid seed offset');
+if (!Number.isInteger(offset) || offset < 0)
+  throw new Error("Invalid seed offset");
 if (args["decision-policy"] !== "decline")
   throw new Error(
     "Specify --decision-policy=decline to authorize headless choices.",
@@ -28,9 +29,11 @@ const netWorths: bigint[] = [],
   monthlyCounts: Record<string, number> = {};
 const modeCounts = { REALISM: 0, HARDSHIP: 0 };
 for (let i = 0; i < count; i++) {
-  const index=offset+i,mode = index % 2 === 0 ? "REALISM" : "HARDSHIP",
+  const index = offset + i,
+    mode = index % 2 === 0 ? "REALISM" : "HARDSHIP",
     provinceId = provinces.provinces[Math.floor(index / 2) % 63].id;
   let s = createLife({
+    legacyDemo: true,
     seed: `qa-life-${Math.floor(index / 2)}`,
     mode,
     provinceId,
@@ -93,7 +96,7 @@ const result = {
   quality: "MODEL_ASSUMPTION_NOT_CALIBRATION",
   decisionPolicy: "decline",
   count,
-  seedOffset:offset,
+  seedOffset: offset,
   ticks,
   decisions,
   modeCounts,

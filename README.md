@@ -1,8 +1,10 @@
 # Một Đời Ở Việt Nam · VN63
 
-Bản **v1.3 Dynamic Branches + Causal Startups (alpha)**, tích hợp trên nền monthly v1.2. Một tick là một tháng Gregory; fast-forward vẫn chạy mọi tháng trung gian. Spec: **v1.3 > v1.2 > v1.1 > v1.0**.
+Nhánh **P0/P1 — nền tảng lịch sử 1975**, triển khai theo master handoff PR #7, giữ Next.js/TypeScript và engine kế toán/business v1.3. Một nhịp 1× ≈ 1 giây/7 ngày Gregorian; đóng báo cáo và business cuối tháng. Giao diện bốn nhóm: Sự nghiệp / Tài chính / Quan hệ / Bản thân, nhật ký là trang chính.
 
-Repo đích: [conghau115599/vn63](https://github.com/conghau115599/vn63). Người dùng tự tạo project Vercel; task này không tạo hosting.
+**Chưa phải toàn bộ game lịch sử hoàn chỉnh.** Lượt sinh mới mặc định ngày seeded trong 1975, nhưng mapping hành chính, tiền tệ và nghề theo niên đại còn thiếu dữ liệu P2. Bản nền lịch sử hiển thị giới hạn và khóa nghiệp vụ liên quan; không lấy lương/giá VND hiện đại làm số liệu 1975. Các kịch bản tuổi 28/75 và save cũ giữ mô hình demo hiện đại để hồi quy, không bị chuyển năm sinh hoặc quy đổi số dư.
+
+[P0 gap matrix](docs/VN63_GAP_MATRIX.md) · [P1 implementation/limits](docs/VN63_PHASE1_IMPLEMENTATION.md) · [QA](docs/VN63_PHASE1_QA.md). Không tự merge/deploy production.
 
 ## Chạy local
 
@@ -13,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Mở http://127.0.0.1:3000. Chọn từ khi sinh, chơi thử tuổi 28 hoặc hai hoàn cảnh tuổi 75. Có thể đặt khu vực cư trú/nguồn lực cho hoàn cảnh caregiver. REALISM là **PROVISIONAL MODEL**, mọi hệ số chưa hiệu chuẩn đều là ASSUMPTION.
+Mở http://127.0.0.1:3000. Chọn từ khi sinh, chơi thử tuổi 28 hoặc hai hoàn cảnh tuổi 75. Có thể đặt khu vực cư trú/nguồn lực cho hoàn cảnh caregiver. Chế độ Thực tế là **mô hình chưa hiệu chuẩn**, mọi hệ số chưa hiệu chuẩn đều là ASSUMPTION.
 
 ## Kiểm tra và build
 
@@ -30,13 +32,14 @@ npm start
 ```sh
 npx playwright install chromium
 npm run test:e2e
+npm run qa:p1 -- --count=1000
 npm run simulate -- --count=1000 --decision-policy=decline --output=qa-results/local-lives.json
 npm run qa:v13 -- --count=10000 --months=24 --output=qa-results/local-businesses.json
 ```
 
 Business cohort chạy 10.000 doanh nghiệp **mỗi cấu hình**: 2 mode ×3 chiến lược =60.000 doanh nghiệp, mỗi doanh nghiệp 24 tháng. Phân tầng tỉnh/ngành/vốn là fixture, không phải tỷ trọng thực tế.
 
-## Tính năng v1.3
+## Các hệ thống v1.3 được giữ lại
 
 Giao diện dashboard ba cột, lấy hướng bố cục từ ảnh tham khảo người chơi cung cấp: hồ sơ và chỉ số, câu chuyện và lựa chọn, người thân và bản đồ cuộc đời. Tab có tên đầy đủ; thanh thời gian nằm trên và ghim khi cuộn. Trên điện thoại chuyển sang một cột và có thể mở/thu gọn hồ sơ.
 
@@ -83,4 +86,4 @@ Alpha chưa hiệu chuẩn theo thống kê Việt Nam. Danh mục 63 tỉnh là
 
 ### Nhịp cuộc đời và nền tảng nghề
 
-Nhịp thường 72 giây/năm, tua 1×–16×, tạm dừng tại quyết định. Nhật ký gộp các tháng yên bình. Hai lộ trình thể thao/biểu diễn xét tiềm năng bẩm sinh giả lập, nền tảng hiện tại và thời gian rèn luyện; không tự cấp thành công chỉ từ năng khiếu. Xem [chi tiết mô hình](docs/TIME_AND_CAREER_FIT.md).
+Nhịp cũ 72 giây/năm đã được thay bằng 1 giây/tuần ở P1, tua 1×–16×, tạm dừng tại quyết định. Nhật ký gộp các tháng yên bình. Hai lộ trình thể thao/biểu diễn xét tiềm năng bẩm sinh giả lập, nền tảng hiện tại và thời gian rèn luyện; không tự cấp thành công chỉ từ năng khiếu. Xem [chi tiết mô hình](docs/TIME_AND_CAREER_FIT.md).

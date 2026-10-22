@@ -118,10 +118,19 @@ export function resolveSchedule(
     !options.obligations?.length &&
     !options.businessHoursPerWeek;
   const hasPractice = !!options.practiceHoursPerWeek;
-  const cacheKey = `${policy}/${(options.age ?? 28) < 18}/${options.employed === false}/${n}/${weekday(dateInMonth(month, 1))}`;
+  const cacheKey = `${policy}/${(options.age ?? 28) < 5 ? "infant" : (options.age ?? 28) < 18 ? "child" : "adult"}/${options.employed === false}/${n}/${weekday(dateInMonth(month, 1))}`;
   if (cacheable && !hasPractice && scheduleCache.has(cacheKey))
     return copyReport(scheduleCache.get(cacheKey)!);
-  if ((options.age ?? 28) < 18) {
+  if ((options.age ?? 28) < 5) {
+    for (const k of categories) weekly[k] = 0;
+    Object.assign(weekly, {
+      sleep: 84,
+      care: 21,
+      family: 21,
+      household: 21,
+      rest: 21,
+    });
+  } else if ((options.age ?? 28) < 18) {
     weekly.study += weekly.work;
     weekly.work = 0;
     weekly.rest += weekly.commute;

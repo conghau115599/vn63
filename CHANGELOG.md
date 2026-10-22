@@ -1,5 +1,13 @@
 # Changelog
 
+## P0/P1 · 22/10/2026 · nhánh review
+
+- Audit canon master PR #7/Issues #1–#5/PR #6 và prototype v1.7; gap matrix, risks và dependencies.
+- Tick tuần 7 ngày dùng lại vòng ngày và quyết toán tháng; lưu target còn lại khi pause, định dạng ngày Việt, 4 nhóm quản lý.
+- Ngày sinh seeded năm 1975 cho game mới; 0–4 giám hộ thu xếp, 5+ chọn thói quen theo tuổi/hoàn cảnh; giữ sổ cũ và backup trước chuyển tuần.
+- Nền lịch sử chặn nghiệp vụ cần dữ liệu niên đại chưa có, không áp tiền/giá/địa danh hiện đại như fact 1975. P2–P9 chưa hoàn thành.
+- Giữ regression v1.3 với fixtures legacyDemo riêng; tests calendar/agency/migration/browser và weekly lifetime smoke. Xem docs/VN63_PHASE1_QA.md cho bằng chứng thực.
+
 ## Nhịp cuộc đời & nền tảng nghề nghiệp · 20/10/2026
 
 - Nhịp mặc định 72 giây/năm; Tiếp tục/Tạm dừng, 1×–16×, tiến độ năm và dừng ở lựa chọn. Gộp các tháng yên bình liên tiếp trong nhật ký.
