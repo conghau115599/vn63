@@ -14,7 +14,8 @@
     "test": "node --import ./scripts/windows-local.mjs node_modules/vitest/vitest.mjs run --configLoader native",
     "test:e2e": "playwright test",
     "simulate": "tsc -p tsconfig.sim.json && node .sim-build/scripts/simulate.js",
-    "qa:v13": "tsc -p tsconfig.sim.json && node .sim-build/scripts/qa-v13.js"
+    "qa:v13": "tsc -p tsconfig.sim.json && node .sim-build/scripts/qa-v13.js",
+    "qa:p1": "tsc -p tsconfig.sim.json && node .sim-build/scripts/qa-p1.js"
   },
   "dependencies": {
     "idb": "8.0.4",

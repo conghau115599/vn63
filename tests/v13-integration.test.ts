@@ -22,7 +22,7 @@ function finish(s: GameState, input: Partial<MonthlyInput> = {}) {
   return r.nextState;
 }
 it("transfers owner capital once, validates, launches, persists and reconciles both ledgers", () => {
-  let s = createLife({ seed: "founder", start: "ADULT" });
+  let s = createLife({ legacyDemo: true, seed: "founder", start: "ADULT" });
   const opening = BigInt(s.cashVnd);
   s = finish(s, {
     startBusiness: { sectorId: "retail", capitalVnd: "15000000" },
@@ -45,14 +45,14 @@ it("transfers owner capital once, validates, launches, persists and reconciles b
   expect(s.ledger.filter((t) => t.source === "owner-capital")).toHaveLength(1);
 });
 it("does not let a child launch or personal cash finance a second time after pause", () => {
-  const child = createLife({ seed: "no-child-founder" });
+  const child = createLife({ legacyDemo: true, seed: "no-child-founder" });
   expect(() =>
     advanceMonth(child, {
       yearMonth: child.currentMonth,
       startBusiness: { sectorId: "retail", capitalVnd: "1" },
     }),
   ).toThrow(/quyền/);
-  const poor = createLife({ seed: "poor", start: "ADULT" });
+  const poor = createLife({ legacyDemo: true, seed: "poor", start: "ADULT" });
   expect(() =>
     advanceMonth(poor, {
       yearMonth: poor.currentMonth,
@@ -62,7 +62,11 @@ it("does not let a child launch or personal cash finance a second time after pau
   expect(poor.business).toBeNull();
 });
 it("caregiving reduces actual founder capacity and keeps bills/npc memory after save", () => {
-  let s = createLife({ seed: "care-business", start: "ADULT" });
+  let s = createLife({
+    legacyDemo: true,
+    seed: "care-business",
+    start: "ADULT",
+  });
   s = finish(s, {
     startBusiness: { sectorId: "retail", capitalVnd: "15000000" },
     business: { yearMonth: s.currentMonth, action: "VALIDATE" },
@@ -86,7 +90,11 @@ it("caregiving reduces actual founder capacity and keeps bills/npc memory after 
   expect(auditMonth(r.nextState).businessBalanced).toBe(true);
 });
 it("matched manual/fast business months have identical ledger, events and traits", () => {
-  let a = createLife({ seed: "integrated-replay", start: "ADULT" });
+  let a = createLife({
+    legacyDemo: true,
+    seed: "integrated-replay",
+    start: "ADULT",
+  });
   a = finish(a, {
     startBusiness: { sectorId: "retail", capitalVnd: "15000000" },
     business: { yearMonth: a.currentMonth, action: "VALIDATE" },
@@ -111,6 +119,7 @@ it("100 contrasting lives expose diverse relevant event pools, with no mandatory
   const signatures = new Set<string>();
   for (let i = 0; i < 120; i++) {
     const s = createLife({
+      legacyDemo: true,
       seed: `contexts-${i}`,
       start:
         i % 3 === 0 ? "SENIOR_SOLO" : i % 3 === 1 ? "SENIOR_CARE" : "BIRTH",

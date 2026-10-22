@@ -7,10 +7,12 @@ import { DecisionPopup, LifeJournal } from "../components/LifeJournal";
 import { CareerPanel } from "../components/CareerPanel";
 import { InsightPanel, PersonalityPanel } from "../components/InsightPanel";
 import { businessOwnerHours } from "../simulation/business/advanceBusinessMonth";
-import { advanceMonth, advanceMonths } from "../simulation/core/advanceMonth";
+import { advanceMonth } from "../simulation/core/advanceMonth";
 import {
   ageOn,
   dateInMonth,
+  formatDate,
+  isLeapYear,
   daysInMonth,
 } from "../simulation/calendar/YearMonth";
 import {
@@ -24,13 +26,17 @@ import {
   portfolioValue,
 } from "../simulation/investments/MonthlyMarket";
 import { deserialize, serialize } from "../simulation/save";
-import { loadGame, saveGame } from "../persistence/store";
+import { advanceWeek, advanceWeeks } from "../simulation/core/advanceWeek";
+import { simulationDate, worldContext } from "../simulation/world/contracts";
+import { availableActivities, chooseActivity } from "../simulation/activities";
+import { decisionRoute } from "../simulation/decisions/orchestrator";
+import { loadGame, saveGame, loadRecovery } from "../persistence/store";
 import type { GameState, MonthlyInput } from "../simulation/types";
 import provinceData from "../content/provinces.2024.json";
 import {
-  YEAR_SECONDS,
+  WEEK_SECONDS,
   PLAYBACK_SPEEDS,
-  monthDelay,
+  weekDelay,
 } from "../simulation/playback";
 
 const money = (v: string | bigint) =>
@@ -81,7 +87,13 @@ const tabs = [
   ["method", "Về mô hình", "ⓘ"],
   ["insight", "Kiểm tra mô hình", "⚙"],
 ] as const;
-type Tab = (typeof tabs)[number][0];
+type Tab = (typeof tabs)[number][0] | "self";
+const groups = [
+  ["career", "Sự nghiệp", "↗"],
+  ["finance", "Tài chính", "₫"],
+  ["family", "Quan hệ", "♡"],
+  ["self", "Bản thân", "❧"],
+] as const;
 function Landscape() {
   return (
     <svg
@@ -129,7 +141,7 @@ export default function Home() {
     [speed, setSpeed] = useState(1),
     [page, setPage] = useState(0);
   const [name, setName] = useState("Minh An"),
-    [seed, setSeed] = useState("mot-doi-2024"),
+    [seed, setSeed] = useState("mot-doi-1975"),
     [province, setProvince] = useState("ha-noi"),
     [mode, setMode] = useState<"REALISM" | "HARDSHIP">("REALISM"),
     [start, setStart] = useState<StartScenario>("BIRTH"),
@@ -178,12 +190,26 @@ export default function Home() {
     (count = 1, input?: Partial<MonthlyInput>) => {
       if (!game) return;
       setError("");
+      if (input) {
+        setAuto(false);
+        setSeek(false);
+      }
       try {
-        const r = input
-          ? advanceMonth(game, { yearMonth: game.currentMonth, ...input })
-          : advanceMonths(game, count);
+        const r = input?.choice
+          ? advanceWeek(game, input.choice)
+          : input
+            ? advanceMonth(
+                {
+                  ...game,
+                  calendarMode: "WEEKLY_V1",
+                  currentDate: simulationDate(game),
+                  weeklyCursor: undefined,
+                },
+                { yearMonth: game.currentMonth, ...input },
+              )
+            : advanceWeeks(game, count);
         setGame(r.nextState);
-        if (r.status !== "COMMITTED") {
+        if (r.status === "PAUSED" || r.status === "DECEASED") {
           setAuto(false);
           setSeek(false);
         }
@@ -199,14 +225,15 @@ export default function Home() {
     if (!(auto || seek) || !game?.living || game.pendingDecision) return;
     const timer = setTimeout(
       () => run(seek ? 12 : 1),
-      seek ? 30 : monthDelay(speed),
+      seek ? 30 : weekDelay(speed),
     );
     return () => clearTimeout(timer);
   }, [auto, seek, speed, game, run]);
   const begin = () => {
     setGame(
       createLife({
-        seed: seed.trim() || "mot-doi-2024",
+        legacyDemo: start !== "BIRTH",
+        seed: seed.trim() || "mot-doi-1975",
         name,
         provinceId: province,
         mode,
@@ -217,7 +244,7 @@ export default function Home() {
     );
     setTab("overview");
     setError("");
-    setAuto(true);
+    setAuto(false);
     setSeek(false);
   };
   const exportSave = () => {
@@ -243,24 +270,17 @@ export default function Home() {
       setError((e as Error).message);
     }
   };
-  const age = game
-    ? ageOn(
-        game.birthDate,
-        game.deathDate ??
-          dateInMonth(
-            game.currentMonth,
-            Math.max(
-              1,
-              game.currentMonth === game.birthDate.slice(0, 7)
-                ? +game.birthDate.slice(8)
-                : 1,
-            ),
-          ),
-      )
-    : 0;
-  const location =
-    provinceData.provinces.find((p) => p.id === game?.residenceProvinceId)
-      ?.name ?? "Việt Nam";
+  const currentDate = game ? simulationDate(game) : "1975-01-01";
+  const age = game ? ageOn(game.birthDate, currentDate) : 0;
+  const context = game ? worldContext(game) : null;
+  const location = context?.locationName ?? "Việt Nam";
+  useEffect(() => {
+    if (
+      game?.pendingDecision &&
+      decisionRoute(game, game.pendingDecision) === "GUARDIAN"
+    )
+      run();
+  }, [game, run]);
   const schedule = game
     ? (game.cursor?.time ??
       resolveSchedule(game.currentMonth, game.policy, {
@@ -306,6 +326,15 @@ export default function Home() {
       </div>
     </>
   );
+  const yearDays = isLeapYear(+currentDate.slice(0, 4)) ? 366 : 365;
+  const elapsedDays =
+    Array.from({ length: +currentDate.slice(5, 7) - 1 }, (_, i) =>
+      daysInMonth(
+        `${currentDate.slice(0, 4)}-${String(i + 1).padStart(2, "0")}`,
+      ),
+    ).reduce((a, b) => a + b, 0) +
+    +currentDate.slice(8) -
+    1;
   const playback = game?.living ? (
     <section className="playback" aria-label="Điều khiển thời gian">
       <div className="playback-status">
@@ -323,7 +352,7 @@ export default function Home() {
           <small>
             {game.pendingDecision
               ? "Chọn để tiếp tục tháng hiện tại"
-              : `1 năm ≈ ${(YEAR_SECONDS / speed).toLocaleString("vi-VN")} giây · ${speed}×`}
+              : `1 giây ≈ ${7 * speed} ngày · ${speed}×`}
           </small>
         </div>
       </div>
@@ -365,7 +394,7 @@ export default function Home() {
           disabled={!!game.pendingDecision || auto || seek}
           onClick={() => run()}
         >
-          Sang tháng <span>→</span>
+          Qua một tuần <span>→</span>
         </button>
       </div>
       <div
@@ -373,18 +402,18 @@ export default function Home() {
         role="progressbar"
         aria-label={`Năm ${game.currentMonth.slice(0, 4)}`}
         aria-valuemin={0}
-        aria-valuemax={12}
-        aria-valuenow={Number(game.currentMonth.slice(5)) - 1}
+        aria-valuemax={yearDays}
+        aria-valuenow={elapsedDays}
       >
         <span
-          key={`${game.currentMonth}/${speed}/${auto}`}
+          key={`${currentDate}/${speed}/${auto}`}
           className={auto ? "clock-running" : ""}
           style={
             {
-              width: `${((Number(game.currentMonth.slice(5)) - 1) / 12) * 100}%`,
-              animationDuration: `${monthDelay(speed)}ms`,
-              "--clock-from": `${((Number(game.currentMonth.slice(5)) - 1) / 12) * 100}%`,
-              "--clock-to": `${(Number(game.currentMonth.slice(5)) / 12) * 100}%`,
+              width: `${(elapsedDays / yearDays) * 100}%`,
+              animationDuration: `${weekDelay(speed)}ms`,
+              "--clock-from": `${(elapsedDays / yearDays) * 100}%`,
+              "--clock-to": `${Math.min(100, ((elapsedDays + 7) / yearDays) * 100)}%`,
             } as React.CSSProperties
           }
         />
@@ -421,15 +450,15 @@ export default function Home() {
           ) : (
             <>
               <b>Một cuộc đời, nhiều ngã rẽ.</b>
-              <span>Mô phỏng cuộc sống theo từng tháng</span>
+              <span>Một tuần mỗi nhịp, một đời để sống</span>
             </>
           )}
         </div>
         <span className="masthead-edition">
-          VN63 / MONTHLY<span>BẢN THỬ NGHIỆM 1.3</span>
+          VN63 / CUỘC ĐỜI<span>NỀN TẢNG 1975 · P1</span>
         </span>
-        <nav aria-label="Điều hướng cuộc đời">
-          {tabs.map(([id, title, icon]) => (
+        <nav aria-label="Bốn nhóm quản lý">
+          {groups.map(([id, title, icon]) => (
             <button
               key={id}
               className={tab === id ? "nav-item active" : "nav-item"}
@@ -445,27 +474,65 @@ export default function Home() {
       <div className="main-shell">
         <header className="topbar">
           <span className="breadcrumb">
-            Một Đời <span>/</span> {tabs.find((t) => t[0] === tab)?.[1]}
+            <button
+              className="text-button"
+              onClick={() => navigate("overview")}
+            >
+              Nhật ký cuộc đời
+            </button>
+            <span>/</span>
+            {groups.find((g) => g[0] === tab)?.[1] ??
+              tabs.find((t) => t[0] === tab)?.[1]}
           </span>
           <div className="top-actions">
-            <span className="demo-badge">MÔ HÌNH GIẢ ĐỊNH</span>
+            <details className="more-menu">
+              <summary>Xem thêm</summary>
+              <button onClick={() => navigate("journal")}>
+                Sổ tháng & tổng kết
+              </button>
+              <button onClick={() => navigate("method")}>
+                Nguồn & mô hình
+              </button>
+              <button onClick={() => navigate("insight")}>
+                Kiểm tra mô hình
+              </button>
+              <button
+                onClick={async () => {
+                  const original = await loadRecovery();
+                  if (!original) {
+                    setError("Chưa có bản sao trước khi chuyển nhịp tuần.");
+                    return;
+                  }
+                  const url = URL.createObjectURL(
+                    new Blob([original], { type: "application/json" }),
+                  );
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "vn63-truoc-nhip-tuan.json";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                Xuất bản lưu trước chuyển đổi
+              </button>
+            </details>
             {game && (
               <button className="text-button" onClick={exportSave}>
-                Xuất save ↓
+                Xuất bản lưu ↓
               </button>
             )}
             <button
               className="text-button"
               onClick={() => upload.current?.click()}
             >
-              Nhập save ↑
+              Nhập bản lưu ↑
             </button>
             <input
               ref={upload}
               hidden
               type="file"
               accept=".json,application/json"
-              aria-label="Nhập save JSON"
+              aria-label="Nhập bản lưu JSON"
               onChange={(e) => {
                 void importSave(e.target.files?.[0]);
                 e.target.value = "";
@@ -501,7 +568,7 @@ export default function Home() {
                       <em>nhiều ngã rẽ.</em>
                     </h1>
                     <p className="intro">
-                      Từng tháng trôi qua, những lựa chọn nhỏ làm nên câu chuyện
+                      Sinh ra năm 1975, những tuần tháng nhỏ làm nên câu chuyện
                       của bạn. Giữa công việc, gia đình và những điều mình muốn
                       giữ.
                     </p>
@@ -530,7 +597,7 @@ export default function Home() {
                         />
                       </label>
                       <label>
-                        Nơi sinh
+                        Vùng tham chiếu (địa giới 2024)
                         <select
                           value={province}
                           onChange={(e) => setProvince(e.target.value)}
@@ -559,7 +626,7 @@ export default function Home() {
                           }
                         >
                           <option value="BIRTH">
-                            Chào đời · Tháng 01/2024
+                            Chào đời · Ngày ngẫu nhiên năm 1975
                           </option>
                           <option value="ADULT">
                             Chơi thử tuổi 28 · Tháng 01/2052
@@ -626,7 +693,7 @@ export default function Home() {
                           checked={mode === "REALISM"}
                           onChange={() => setMode("REALISM")}
                         />
-                        <b>REALISM</b>
+                        <b>Thực tế</b>
                         <span>Đời thường, nhiều hướng đi</span>
                       </label>
                       <label
@@ -642,12 +709,12 @@ export default function Home() {
                           checked={mode === "HARDSHIP"}
                           onChange={() => setMode("HARDSHIP")}
                         />
-                        <b>HARDSHIP</b>
+                        <b>Khắc nghiệt</b>
                         <span>Ít dự phòng, thêm áp lực</span>
                       </label>
                     </fieldset>
                     <button className="primary wide" onClick={begin}>
-                      Bắt đầu cuộc đời <span>↗</span>
+                      Bắt đầu cuộc đời <span aria-hidden="true">↗</span>
                     </button>
                   </div>
                   <div className="about-card">
@@ -664,10 +731,10 @@ export default function Home() {
                     </p>
                     <hr />
                     <p className="fine">
-                      Bản alpha dùng dữ liệu và cân bằng giả định. REALISM hiện
-                      là <b>PROVISIONAL MODEL</b>, chưa hiệu chuẩn theo thống
-                      kê. Thời điểm cuối đời là kịch bản demo. Tiến trình lưu
-                      trên thiết bị.
+                      Bản thử nghiệm dùng dữ liệu và cân bằng giả định. Chế độ
+                      Thực tế hiện là <b>mô hình chưa hiệu chuẩn</b>, chưa hiệu
+                      chuẩn theo thống kê. Thời điểm cuối đời là kịch bản demo.
+                      Tiến trình lưu trên thiết bị.
                     </p>
                   </div>
                 </section>
@@ -688,8 +755,10 @@ export default function Home() {
                     <p>
                       {age} tuổi <span className="dot">·</span> {location}{" "}
                       <span className="dot">·</span>{" "}
-                      <span className="mode-tag">{game.mode}</span>
-                      {game.mode === "REALISM" && " · PROVISIONAL MODEL"}
+                      <span className="mode-tag">
+                        {game.mode === "REALISM" ? "Thực tế" : "Khắc nghiệt"}
+                      </span>
+                      · Mô hình chưa hiệu chuẩn
                     </p>
                   </div>
                   <div className="save-note" role="status" aria-live="polite">
@@ -735,172 +804,222 @@ export default function Home() {
                     </button>
                   </section>
                 )}
-                {game.pendingDecision && (
-                  <DecisionPopup
-                    key={game.pendingDecision.id}
-                    game={game}
-                    error={error}
-                    onReview={() => navigate("overview")}
-                    onChoose={(optionId) =>
-                      run(1, {
-                        choice: { eventId: game.pendingDecision!.id, optionId },
-                      })
-                    }
-                  />
+                {context && (
+                  <p className="context-notice">{context.noticeVi}</p>
                 )}
+                <p className="current-date">
+                  <time dateTime={currentDate} aria-label="Ngày trong game">
+                    {formatDate(currentDate)}
+                  </time>{" "}
+                  ·{" "}
+                  {age < 5
+                    ? "Gia đình đang chăm sóc, bạn quan sát những năm đầu đời."
+                    : "Mỗi lựa chọn để lại dấu ấn."}
+                </p>
+                {game.cursor &&
+                  !game.pendingDecision &&
+                  age >= 5 &&
+                  ["career", "business", "finance"].includes(tab) && (
+                    <section className="panel plan-notice">
+                      <p>
+                        Kế hoạch tháng này đang thực hiện. Nghiệp vụ công việc,
+                        đầu tư và cửa hàng được điều chỉnh ở đầu tháng.
+                      </p>
+                      <button className="secondary" onClick={() => run(1, {})}>
+                        Chuẩn bị kế hoạch tháng tới
+                      </button>
+                      <small>
+                        Nếu có tình huống quan trọng trước đó, thời gian sẽ dừng
+                        để bạn xem xét.
+                      </small>
+                    </section>
+                  )}
+                {game.pendingDecision &&
+                  decisionRoute(game, game.pendingDecision) ===
+                    "MUST_PAUSE" && (
+                    <DecisionPopup
+                      key={game.pendingDecision.id}
+                      game={game}
+                      error={error}
+                      onReview={() => navigate("overview")}
+                      onChoose={(optionId) =>
+                        run(1, {
+                          choice: {
+                            eventId: game.pendingDecision!.id,
+                            optionId,
+                          },
+                        })
+                      }
+                    />
+                  )}
                 {tab === "overview" && (
                   <>
                     <LifeJournal
                       game={game}
                       onArchive={() => navigate("journal")}
                     />
-                    <details className="panel life-details">
-                      <summary>
-                        Nhịp sống & kế hoạch của tôi{" "}
-                        <span>Thời gian · tiền bạc · khung cảnh</span>
-                      </summary>
-                      <LifeScene game={game} age={age} location={location} />
-                      <section className="stats-grid overview-vitals">
-                        {[
-                          ["Sức khỏe", game.health, "Giữ nhịp nghỉ ngơi"],
-                          [
-                            "Hạnh phúc",
-                            0.3 * game.mood + 0.7 * game.satisfaction,
-                            "Cảm xúc & hài lòng dài hạn",
-                          ],
-                          ["Kiến thức", game.knowledge, "Tích lũy từng tháng"],
-                          [
-                            "Gắn bó",
-                            game.npcs
-                              .filter((n) => n.living)
-                              .reduce((a, n) => a + n.bond, 0) /
-                              Math.max(
-                                1,
-                                game.npcs.filter((n) => n.living).length,
-                              ),
-                            "Sự hiện diện có ý nghĩa",
-                          ],
-                        ].map(([label, value, note], i) => (
-                          <div className="stat panel" key={String(label)}>
-                            <div className="stat-label">
-                              {label}
-                              <span>{["✚", "☀", "✧", "♡"][i]}</span>
+                    {context?.economyReady && (
+                      <details className="panel life-details">
+                        <summary>
+                          Nhịp sống & kế hoạch của tôi{" "}
+                          <span>Thời gian · tiền bạc · khung cảnh</span>
+                        </summary>
+                        <LifeScene game={game} age={age} location={location} />
+                        <section className="stats-grid overview-vitals">
+                          {[
+                            ["Sức khỏe", game.health, "Giữ nhịp nghỉ ngơi"],
+                            [
+                              "Hạnh phúc",
+                              0.3 * game.mood + 0.7 * game.satisfaction,
+                              "Cảm xúc & hài lòng dài hạn",
+                            ],
+                            [
+                              "Kiến thức",
+                              game.knowledge,
+                              "Tích lũy từng tháng",
+                            ],
+                            [
+                              "Gắn bó",
+                              game.npcs
+                                .filter((n) => n.living)
+                                .reduce((a, n) => a + n.bond, 0) /
+                                Math.max(
+                                  1,
+                                  game.npcs.filter((n) => n.living).length,
+                                ),
+                              "Sự hiện diện có ý nghĩa",
+                            ],
+                          ].map(([label, value, note], i) => (
+                            <div className="stat panel" key={String(label)}>
+                              <div className="stat-label">
+                                {label}
+                                <span>{["✚", "☀", "✧", "♡"][i]}</span>
+                              </div>
+                              <strong>
+                                {Math.round(Number(value))}
+                                <small>/100</small>
+                              </strong>
+                              <div className="mini-meter">
+                                <i style={{ width: `${value}%` }} />
+                              </div>
+                              <p>{note}</p>
                             </div>
-                            <strong>
-                              {Math.round(Number(value))}
-                              <small>/100</small>
-                            </strong>
-                            <div className="mini-meter">
-                              <i style={{ width: `${value}%` }} />
-                            </div>
-                            <p>{note}</p>
-                          </div>
-                        ))}
-                      </section>
-                      <div className="dashboard-grid">
-                        <section className="panel month-money">
-                          <div className="section-heading">
-                            <div>
-                              <p className="eyebrow">TIỀN BẠC & SỰ AN TÂM</p>
-                              <h2>Khoảng thở tài chính</h2>
-                            </div>
-                            <button
-                              className="icon-button"
-                              aria-label="Xem tài chính"
-                              onClick={() => navigate("finance")}
-                            >
-                              ↗
-                            </button>
-                          </div>
-                          <div className="cash-hero">
-                            <small>Tiền mặt hiện có</small>
-                            <strong>{money(game.cashVnd)}</strong>
-                          </div>
-                          <div className="money-rows">
-                            <div>
-                              <span>Thu tháng đã hoàn tất</span>
-                              <b className="positive">
-                                + {money(report?.inflowVnd ?? "0")}
-                              </b>
-                            </div>
-                            <div>
-                              <span>Chi tháng đã hoàn tất</span>
-                              <b>− {money(report?.outflowVnd ?? "0")}</b>
-                            </div>
-                            <div>
-                              <span>Dư nợ</span>
-                              <b>{money(debts)}</b>
-                            </div>
-                          </div>
-                          <div className="buffer-note">
-                            ◷ Quỹ tiền mặt ≈{" "}
-                            {(
-                              Number(game.cashVnd) /
-                              (game.mode === "HARDSHIP" ? 8500000 : 7500000)
-                            ).toFixed(1)}{" "}
-                            tháng chi phí mẫu
-                          </div>
+                          ))}
                         </section>
-                        <section className="panel time-panel">
-                          <div className="section-heading">
-                            <div>
-                              <p className="eyebrow">THỨ KHÔNG THỂ ĐỂ DÀNH</p>
-                              <h2>Thời gian của bạn</h2>
+                        <div className="dashboard-grid">
+                          <section className="panel month-money">
+                            <div className="section-heading">
+                              <div>
+                                <p className="eyebrow">TIỀN BẠC & SỰ AN TÂM</p>
+                                <h2>Khoảng thở tài chính</h2>
+                              </div>
+                              <button
+                                className="icon-button"
+                                aria-label="Xem tài chính"
+                                onClick={() => navigate("finance")}
+                              >
+                                ↗
+                              </button>
                             </div>
-                            <span className="subtle">
-                              {daysInMonth(game.currentMonth)} ngày
-                            </span>
-                          </div>
-                          <label className="policy-label">
-                            Lịch sống duy trì
-                            <select
-                              aria-label="Lịch sống"
-                              value={game.policy}
-                              disabled={locked || !adult}
-                              onChange={(e) => {
-                                setAuto(false);
-                                setSeek(false);
-                                setGame({
-                                  ...game,
-                                  policy: e.target.value as Policy,
-                                });
-                              }}
-                            >
-                              {Object.entries(policies).map(([id, p]) => (
-                                <option key={id} value={id}>
-                                  {p.name}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                          <p className="schedule-detail">
-                            {adult
-                              ? game.job
-                                ? policies[game.policy].detail
-                                : "Chưa có hợp đồng việc làm · giờ làm được trả về thời gian nghỉ"
-                              : "Lịch học & chăm sóc theo người giám hộ"}
-                          </p>
-                          {timeBar}
-                          <p className="fine">
-                            Lịch trung bình 168 giờ/tuần được phân bổ thành phút
-                            theo ngày thực. Làm thêm chỉ có tiền khi hợp đồng
-                            trả công.
-                          </p>
-                        </section>
-                        <section className="small-quote">
-                          <span>“</span>
-                          <p>
-                            Có những tháng không có chuyện lớn.
-                            <br />
-                            Nhưng vẫn là một phần cuộc đời.
-                          </p>
-                          <small>CHẬM MỘT CHÚT, SỐNG MỘT ĐỜI.</small>
-                        </section>
-                      </div>
-                    </details>
+                            <div className="cash-hero">
+                              <small>Tiền mặt hiện có</small>
+                              <strong>{money(game.cashVnd)}</strong>
+                            </div>
+                            <div className="money-rows">
+                              <div>
+                                <span>Thu tháng đã hoàn tất</span>
+                                <b className="positive">
+                                  + {money(report?.inflowVnd ?? "0")}
+                                </b>
+                              </div>
+                              <div>
+                                <span>Chi tháng đã hoàn tất</span>
+                                <b>− {money(report?.outflowVnd ?? "0")}</b>
+                              </div>
+                              <div>
+                                <span>Dư nợ</span>
+                                <b>{money(debts)}</b>
+                              </div>
+                            </div>
+                            <div className="buffer-note">
+                              ◷ Quỹ tiền mặt ≈{" "}
+                              {(
+                                Number(game.cashVnd) /
+                                (game.mode === "HARDSHIP" ? 8500000 : 7500000)
+                              ).toFixed(1)}{" "}
+                              tháng chi phí mẫu
+                            </div>
+                          </section>
+                          <section className="panel time-panel">
+                            <div className="section-heading">
+                              <div>
+                                <p className="eyebrow">THỨ KHÔNG THỂ ĐỂ DÀNH</p>
+                                <h2>Thời gian của bạn</h2>
+                              </div>
+                              <span className="subtle">
+                                {daysInMonth(game.currentMonth)} ngày
+                              </span>
+                            </div>
+                            <label className="policy-label">
+                              Lịch sống duy trì
+                              <select
+                                aria-label="Lịch sống"
+                                value={game.policy}
+                                disabled={locked || !adult}
+                                onChange={(e) => {
+                                  setAuto(false);
+                                  setSeek(false);
+                                  setGame({
+                                    ...game,
+                                    policy: e.target.value as Policy,
+                                  });
+                                }}
+                              >
+                                {Object.entries(policies).map(([id, p]) => (
+                                  <option key={id} value={id}>
+                                    {p.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            <p className="schedule-detail">
+                              {adult
+                                ? game.job
+                                  ? policies[game.policy].detail
+                                  : "Chưa có hợp đồng việc làm · giờ làm được trả về thời gian nghỉ"
+                                : "Lịch học & chăm sóc theo người giám hộ"}
+                            </p>
+                            {timeBar}
+                            <p className="fine">
+                              Lịch trung bình 168 giờ/tuần được phân bổ thành
+                              phút theo ngày thực. Làm thêm chỉ có tiền khi hợp
+                              đồng trả công.
+                            </p>
+                          </section>
+                          <section className="small-quote">
+                            <span>“</span>
+                            <p>
+                              Có những tháng không có chuyện lớn.
+                              <br />
+                              Nhưng vẫn là một phần cuộc đời.
+                            </p>
+                            <small>CHẬM MỘT CHÚT, SỐNG MỘT ĐỜI.</small>
+                          </section>
+                        </div>
+                      </details>
+                    )}
                   </>
                 )}
-                {tab === "business" && (
+                {tab === "business" && !context?.economyReady && (
+                  <section className="panel">
+                    <h2>Kinh doanh theo thời kỳ</h2>
+                    <p>
+                      Chưa có đủ dữ liệu ngành, hình thức kinh doanh và tiền tệ
+                      đúng niên đại.
+                    </p>
+                  </section>
+                )}
+                {tab === "business" && context?.economyReady && (
                   <BusinessPanel
                     key={game.business?.id ?? "new-venture"}
                     game={game}
@@ -918,13 +1037,41 @@ export default function Home() {
                   </div>
                 )}
                 {tab === "career" && (
+                  <div className="panel">
+                    <h2>Sự nghiệp</h2>
+                    <p>Học nghề, tìm việc và xây dựng công việc của mình.</p>
+                    <button
+                      className="secondary"
+                      onClick={() => navigate("business")}
+                      disabled={age < 18 || !context?.economyReady}
+                    >
+                      Quản lý kinh doanh
+                    </button>
+                    {age < 5 && (
+                      <p>
+                        Ở tuổi này, người giám hộ thu xếp việc chăm sóc. Hoạt
+                        động cá nhân mở từ sinh nhật 5 tuổi.
+                      </p>
+                    )}
+                  </div>
+                )}
+                {tab === "career" && age >= 5 && (
                   <CareerPanel
                     key={game.lifeId}
                     game={game}
                     onAdvance={(input) => run(1, input)}
                   />
                 )}
-                {tab === "finance" && (
+                {tab === "finance" && !context?.economyReady && (
+                  <section className="panel">
+                    <h2>Tài chính theo thời kỳ</h2>
+                    <p>
+                      Đang bổ sung đơn vị tiền, giá và quy tắc theo niên đại.
+                      Chưa áp dụng số tiền hiện đại cho cuộc đời lịch sử.
+                    </p>
+                  </section>
+                )}
+                {tab === "finance" && context?.economyReady && (
                   <>
                     <section className="stats-grid financial-stats">
                       {[
@@ -1101,6 +1248,39 @@ export default function Home() {
                     </div>
                   </>
                 )}
+                {tab === "self" && (
+                  <section className="panel">
+                    <h2>Chăm sóc bản thân</h2>
+                    <p>
+                      {age < 5
+                        ? "Gia đình quyết định việc chăm sóc, sinh hoạt và nghỉ ngơi. Bạn chưa phải lựa chọn hoạt động."
+                        : "Chọn một thói quen duy trì. Khi tháng đã bắt đầu, lịch mới có hiệu lực từ đầu tháng sau để giữ nguyên những ngày đã qua."}
+                    </p>
+                    <div className="activity-grid">
+                      {availableActivities(game).map((a) => (
+                        <button
+                          key={a.id}
+                          className="secondary"
+                          disabled={!!game.pendingDecision}
+                          aria-pressed={game.activity === a.id}
+                          onClick={() => {
+                            setAuto(false);
+                            setSeek(false);
+                            setGame(chooseActivity(game, a.id));
+                          }}
+                        >
+                          {a.label}
+                        </button>
+                      ))}
+                    </div>
+                    {age >= 5 && (
+                      <p>
+                        Thói quen lấy tối đa 4 giờ/tuần từ thời gian mềm, giữ
+                        nguyên giấc ngủ và các nghĩa vụ đã nhận.
+                      </p>
+                    )}
+                  </section>
+                )}
                 {tab === "family" && (
                   <>
                     <div className="section-intro">
@@ -1189,8 +1369,15 @@ export default function Home() {
                             <small>· {r.age} tuổi</small>
                           </h3>
                           <p className="fine">
-                            Thu {money(r.inflowVnd)} · Chi {money(r.outflowVnd)}{" "}
-                            · Số dư {money(r.cashCloseVnd)}
+                            {context?.economyReady ? (
+                              <>
+                                Thu {money(r.inflowVnd)} · Chi{" "}
+                                {money(r.outflowVnd)} · Số dư{" "}
+                                {money(r.cashCloseVnd)}
+                              </>
+                            ) : (
+                              "Tiền tệ theo thời kỳ đang bổ sung"
+                            )}
                           </p>
                           {r.events.length ? (
                             r.events.map((e) => <p key={e.id}>{e.text}</p>)
@@ -1242,7 +1429,7 @@ export default function Home() {
                     <h3>Tháng lịch là đơn vị thật của engine</h3>
                     <p>
                       Mỗi bước xử lý một tháng Gregory, gồm từng ngày, nghĩa vụ,
-                      thu chi và sự kiện. Nhịp 1× là khoảng 72 giây/năm; các mức
+                      thu chi và sự kiện. Nhịp 1× là khoảng 1 giây/tuần; các mức
                       tua 1×–16× chỉ đổi thời gian trình diễn. Mọi quyết định
                       quan trọng đều dừng tự động.
                     </p>
@@ -1254,12 +1441,12 @@ export default function Home() {
                       kiến địa phương. Thế giới sau mốc khởi đầu là kịch bản giả
                       lập.
                     </p>
-                    <h3>REALISM và HARDSHIP</h3>
+                    <h3>Thực tế và Khắc nghiệt</h3>
                     <p>
-                      REALISM là PROVISIONAL MODEL. HARDSHIP giảm tiền dự phòng,
-                      tăng chi phí mẫu và tần suất lời mời/sự kiện thường. Hai
-                      chế độ dùng chung lịch, sổ cái, thị trường và quy tắc cuối
-                      đời.
+                      Thực tế là mô hình chưa hiệu chuẩn. Khắc nghiệt giảm tiền
+                      dự phòng, tăng chi phí mẫu và tần suất lời mời/sự kiện
+                      thường. Hai chế độ dùng chung lịch, sổ cái, thị trường và
+                      quy tắc cuối đời.
                     </p>
                     <h3>Sự kiện, tính cách và kinh doanh</h3>
                     <p>
@@ -1273,10 +1460,10 @@ export default function Home() {
                     <p>
                       Cửa hàng có sổ riêng: ngân hàng, tồn kho, phải thu, phải
                       trả và nguồn vốn. Chỉ tiền thực rút được mới về ví cá
-                      nhân. HARDSHIP dùng chi phí doanh nghiệp cao hơn 10%, cửa
-                      sổ suy giảm 0,22 thay 0,12 và đáy nhu cầu 0,55 thay 0,65;
-                      tất cả là giả định, không phải xác suất thất bại doanh
-                      nghiệp ngoài đời.
+                      nhân. Khắc nghiệt dùng chi phí doanh nghiệp cao hơn 10%,
+                      cửa sổ suy giảm 0,22 thay 0,12 và đáy nhu cầu 0,55 thay
+                      0,65; tất cả là giả định, không phải xác suất thất bại
+                      doanh nghiệp ngoài đời.
                     </p>
                     <h3>Cuối đời & dữ liệu còn thiếu</h3>
                     <p>
@@ -1307,8 +1494,8 @@ export default function Home() {
               </>
             )}
             <div className="page-footnote">
-              Một Đời Ở Việt Nam · Danh mục địa phương 2024 · Dữ liệu gameplay
-              giả định
+              Một Đời Ở Việt Nam · Vùng tham chiếu 2024 · Dữ liệu mô phỏng giả
+              định
             </div>
           </main>
           {game && <WorldRail game={game} age={age} onNavigate={navigate} />}

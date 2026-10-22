@@ -30,7 +30,7 @@ export function PersonalityPanel({ game }: { game: GameState }) {
           <div key={t}>
             <span>{traitLabels[t]}</span>
             <b>
-              {game.personality.values[t].toFixed(1)}
+              {Math.round(game.personality.values[t])}
               <small>
                 {" "}
                 {game.personality.lastDelta[t] >= 0 ? "+" : ""}

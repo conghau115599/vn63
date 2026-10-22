@@ -258,8 +258,10 @@ const enriched = legacyTemplates.map((t): ContextEvent => {
       kind: "settlement",
       value: t.id === "early-care" ? "URBAN" : "RURAL",
     });
-  if(t.id==='bike-repair')prerequisites.push({kind:'flag',flag:'OWNS_VEHICLE'});
-  if(t.id==='home-repair')prerequisites.push({kind:'flag',flag:'HOUSING_REPAIR_OBLIGATION'});
+  if (t.id === "bike-repair")
+    prerequisites.push({ kind: "flag", flag: "OWNS_VEHICLE" });
+  if (t.id === "home-repair")
+    prerequisites.push({ kind: "flag", flag: "HOUSING_REPAIR_OBLIGATION" });
   if (t.id === "early-care")
     prerequisites.push({ kind: "resources", value: "AFFLUENT" });
   const acceptRequirements: EventChoice["requirements"] =
@@ -585,7 +587,12 @@ export const templates: ContextEvent[] = [
   ),
 ];
 export function eventForMonth(s: GameState): ContextEvent | undefined {
-  return selectEligibleEvent(s, templates);
+  return selectEligibleEvent(
+    s,
+    s.simulationProfile === "HISTORICAL_FOUNDATION"
+      ? templates.filter((t) => t.kind === "childhood" || t.kind === "family")
+      : templates,
+  );
 }
 export function makeDecision(s: GameState, t: ContextEvent): Decision {
   const date = dateInMonth(s.currentMonth, 12),
@@ -596,7 +603,7 @@ export function makeDecision(s: GameState, t: ContextEvent): Decision {
     date,
     title: t.title,
     body: t.body,
-    authority: age < 6 ? "CAREGIVER" : age < 18 ? "CHILD" : "SELF",
+    authority: age < 5 ? "CAREGIVER" : age < 18 ? "CHILD" : "SELF",
     options: t.choices.map((c) => {
       const reasons = checkConditions(s, c.requirements).filter(
         (r) => !r.eligible,

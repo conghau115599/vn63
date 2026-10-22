@@ -17,6 +17,8 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: P1 weekly historical-foundation smoke
+        run: npx tsc -p tsconfig.sim.json && node .sim-build/scripts/qa-p1.js --count=1000
       - name: Targeted lifetime batch
         run: npm run simulate -- --count=1000 --decision-policy=decline --output=qa-results/ci-1000.json
       - name: Matched business cohorts (10k per mode/strategy)

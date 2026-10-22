@@ -102,6 +102,8 @@ export type World = {
   cpiBasisPoints: number;
 };
 export type Cursor = {
+  startDay?: number;
+  eventTemplateId?: string | null;
   businessInput?: BusinessMonthInput;
   businessFundingVnd?: string;
   day: number;
@@ -131,6 +133,11 @@ export type GameState = {
   name: string;
   birthDate: string;
   currentMonth: string;
+  currentDate?: string;
+  calendarMode?: "WEEKLY_V1";
+  weeklyCursor?: { targetDate: string };
+  simulationProfile?: "HISTORICAL_FOUNDATION" | "LEGACY_DEMO";
+  activity?: "PLAY" | "READ" | "MOVE" | "HELP" | "STUDY" | "REST";
   living: boolean;
   deathDate?: string;
   mode: Mode;
@@ -191,7 +198,7 @@ export type MonthlyInput = {
 };
 export type MonthlyResult = {
   nextState: GameState;
-  status: "PAUSED" | "COMMITTED" | "DECEASED";
+  status: "PAUSED" | "COMMITTED" | "DECEASED" | "IN_PROGRESS";
   committedMonth?: string;
   journal: MonthReport["events"];
   money: {

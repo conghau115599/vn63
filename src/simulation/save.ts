@@ -202,6 +202,8 @@ const legacySchema = z.object({
       events: z.array(event),
       processedIds: z.array(z.string()),
       marketUpdated: z.boolean(),
+      startDay: integer.min(1).max(31).optional(),
+      eventTemplateId: z.string().nullable().optional(),
       businessInput: businessInputSchema.optional(),
       businessFundingVnd: money.optional(),
     })
@@ -278,7 +280,16 @@ const schema = legacySchema.extend({
     })
     .optional(),
   schemaVersion: z.literal(3),
-  engineVersion: z.enum(["1.3.0-alpha.1", "1.3.0-alpha.2"]),
+  engineVersion: z.enum(["1.3.0-alpha.1", "1.3.0-alpha.2", "1.4.0-alpha.1"]),
+  currentDate: date.optional(),
+  calendarMode: z.literal("WEEKLY_V1").optional(),
+  weeklyCursor: z.object({ targetDate: date }).optional(),
+  simulationProfile: z
+    .enum(["HISTORICAL_FOUNDATION", "LEGACY_DEMO"])
+    .optional(),
+  activity: z
+    .enum(["PLAY", "READ", "MOVE", "HELP", "STUDY", "REST"])
+    .optional(),
   eventPackVersion: z.literal("context-demo-v1"),
   context: z.object({
     settlement: z.enum(["URBAN", "RURAL"]),
@@ -382,6 +393,25 @@ export function validateState(raw: unknown): GameState {
       "Save cũ chưa có tháng lịch và ngày sinh đầy đủ. Cần chuyển đổi có xác nhận; bản gốc được giữ nguyên.",
     );
   const parsed = schema.parse(raw) as GameState;
+  if (
+    parsed.currentDate &&
+    (parsed.currentDate.slice(0, 7) !== parsed.currentMonth ||
+      parsed.currentDate < parsed.birthDate)
+  )
+    throw new Error("Ngày hiện tại không khớp tháng lịch.");
+  if (
+    parsed.currentDate &&
+    parsed.cursor &&
+    parsed.currentDate !==
+      `${parsed.currentMonth}-${String(parsed.cursor.day).padStart(2, "0")}`
+  )
+    throw new Error("Ngày hiện tại không khớp cursor.");
+  if (
+    parsed.weeklyCursor &&
+    (!parsed.currentDate ||
+      parsed.weeklyCursor.targetDate <= parsed.currentDate)
+  )
+    throw new Error("Tuần đang xử lý không hợp lệ.");
   if (!parsed.careerDevelopment) {
     parsed.careerDevelopment = initialCareer(
       ageOn(parsed.birthDate, `${parsed.currentMonth}-01`) >= 18,

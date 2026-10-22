@@ -1,0 +1,14 @@
+{
+  "profile": "HISTORICAL_FOUNDATION",
+  "sourceGrade": "ASSUMPTION/MISSING",
+  "count": 1000,
+  "weeks": 4500340,
+  "months": 1030780,
+  "decisions": 22169,
+  "guardianNotices": 0,
+  "minAge": 75,
+  "maxAge": 95,
+  "elapsedMs": 609956,
+  "assertions": "under-five agency, Gregorian weekly traversal, monthly ledger/time conservation, save/reload, bounded termination",
+  "limitation": "Not historical/provincial/mortality calibration; economic content remains gated pending P2."
+}

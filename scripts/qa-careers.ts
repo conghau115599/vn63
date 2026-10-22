@@ -9,6 +9,7 @@ for (const goal of ["ATHLETE", "ARTIST"] as Talent[])
       totalMonths = 0;
     for (let seed = 0; seed < 100; seed++) {
       let s = createLife({
+        legacyDemo: true,
         seed: `career-cohort-${seed}`,
         start: "ADULT",
         strength,
@@ -69,6 +70,7 @@ writeFileSync(
   ),
 );
 let preview = createLife({
+  legacyDemo: true,
   seed: "career-browser",
   start: "ADULT",
   strength: "ARTIST",

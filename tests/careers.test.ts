@@ -21,14 +21,15 @@ function finish(s: GameState, input: Partial<MonthlyInput> = {}) {
   return r.nextState;
 }
 it("birth potential varies by seed, is reproducible and survives old-save loading", () => {
-  const born = createLife({ seed: "born-a" });
-  expect(createLife({ seed: "born-a" }).careerDevelopment.aptitude).toEqual(
-    born.careerDevelopment.aptitude,
-  );
+  const born = createLife({ legacyDemo: true, seed: "born-a" });
+  expect(
+    createLife({ legacyDemo: true, seed: "born-a" }).careerDevelopment.aptitude,
+  ).toEqual(born.careerDevelopment.aptitude);
   const profiles = new Set(
     Array.from({ length: 20 }, (_, i) =>
       JSON.stringify(
-        createLife({ seed: `born-${i}` }).careerDevelopment.aptitude,
+        createLife({ legacyDemo: true, seed: `born-${i}` }).careerDevelopment
+          .aptitude,
       ),
     ),
   );
@@ -41,6 +42,7 @@ it("birth potential varies by seed, is reproducible and survives old-save loadin
 });
 it("foundation and access to learning change progress without awarding a job", () => {
   const supported = createLife({
+    legacyDemo: true,
     seed: "equal-potential",
     start: "ADULT",
     context: { resources: "AFFLUENT" },
@@ -65,7 +67,11 @@ it("foundation and access to learning change progress without awarding a job", (
   expect(supported.job?.occupation).toBeUndefined();
 });
 it("lower inherited potential can still reach a professional audition through practice", () => {
-  const s = createLife({ seed: "persistent", start: "ADULT" });
+  const s = createLife({
+    legacyDemo: true,
+    seed: "persistent",
+    start: "ADULT",
+  });
   s.careerDevelopment.goal = "ARTIST";
   s.careerDevelopment.aptitude.ARTIST = 30;
   s.knowledge = 80;
@@ -80,6 +86,7 @@ it("lower inherited potential can still reach a professional audition through pr
 it("good health or musical aptitude alone does not grant a professional job", () => {
   for (const goal of ["ATHLETE", "ARTIST"] as const) {
     const s = createLife({
+      legacyDemo: true,
       seed: "foundation",
       start: "ADULT",
       strength: goal,
@@ -97,6 +104,7 @@ it("good health or musical aptitude alone does not grant a professional job", ()
 it("a player can actively reach both professions with a good foundation within 18 months", () => {
   for (const goal of ["ATHLETE", "ARTIST"] as const) {
     let s = createLife({
+      legacyDemo: true,
       seed: `route-${goal}`,
       start: "ADULT",
       strength: goal,
@@ -132,8 +140,13 @@ it("a player can actively reach both professions with a good foundation within 1
   }
 });
 it("higher aptitude produces more skill from exactly the same time and seed", () => {
-  let strong = createLife({ seed: "same", start: "ADULT", strength: "ARTIST" }),
-    normal = createLife({ seed: "same", start: "ADULT" });
+  let strong = createLife({
+      legacyDemo: true,
+      seed: "same",
+      start: "ADULT",
+      strength: "ARTIST",
+    }),
+    normal = createLife({ legacyDemo: true, seed: "same", start: "ADULT" });
   normal.careerDevelopment.skill.ARTIST = strong.careerDevelopment.skill.ARTIST;
   for (let i = 0; i < 6; i++) {
     strong = finish(strong, { careerPlan: { goal: "ARTIST", hours: 8 } });
@@ -150,7 +163,7 @@ it("higher aptitude produces more skill from exactly the same time and seed", ()
   );
 });
 it("a failed trial explains the score, preserves progress and prevents monthly retry farming", () => {
-  const s = createLife({ seed: "retry", start: "ADULT" });
+  const s = createLife({ legacyDemo: true, seed: "retry", start: "ADULT" });
   s.careerDevelopment.skill.ATHLETE = 50;
   s.careerDevelopment.aptitude.ATHLETE = 30;
   s.careerDevelopment.minutes.ATHLETE = 18000;
@@ -171,7 +184,7 @@ it("a failed trial explains the score, preserves progress and prevents monthly r
   );
 });
 it("uses actual available minutes, protects child agency and preserves fast/save parity", () => {
-  const child = createLife({ seed: "child-talent" });
+  const child = createLife({ legacyDemo: true, seed: "child-talent" });
   expect(() =>
     advanceMonth(child, {
       yearMonth: child.currentMonth,
@@ -181,7 +194,11 @@ it("uses actual available minutes, protects child agency and preserves fast/save
   expect(careerRequirements(child, "ATHLETE", "TRYOUT")).toContain(
     "Hợp đồng chuyên nghiệp cần đủ 18 tuổi",
   );
-  let s = createLife({ seed: "parity-talent", start: "ADULT" });
+  let s = createLife({
+    legacyDemo: true,
+    seed: "parity-talent",
+    start: "ADULT",
+  });
   s = finish(s, { careerPlan: { goal: "ARTIST", hours: 8 } });
   // Run until first pause, using the same transition in both paths.
   const fast = advanceMonths(deserialize(serialize(s)), 12);

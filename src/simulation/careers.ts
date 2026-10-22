@@ -1,6 +1,7 @@
 import { ageOn, monthsBetween } from "./calendar/YearMonth";
 import { random } from "./rng";
 import type { GameState } from "./types";
+import { simulationDate, worldContext } from "./world/contracts";
 export type Talent = "ATHLETE" | "ARTIST";
 export type CareerPlan = {
   goal: "GENERAL" | Talent;
@@ -89,7 +90,7 @@ export function careerRequirements(
   action: "JOIN_CLUB" | "TRYOUT",
 ): string[] {
   const c = s.careerDevelopment,
-    age = ageOn(s.birthDate, `${s.currentMonth}-01`),
+    age = ageOn(s.birthDate, simulationDate(s)),
     reasons: string[] = [];
   if (age < (action === "JOIN_CLUB" ? 6 : 18))
     reasons.push(
@@ -108,6 +109,10 @@ export function careerRequirements(
   if (action === "JOIN_CLUB" && c.club[goal])
     reasons.push("Đã tham gia câu lạc bộ");
   if (action === "TRYOUT") {
+    if (!worldContext(s).economyReady)
+      reasons.push(
+        "Chưa có dữ liệu nghề và tiền tệ đúng niên đại để mở hợp đồng.",
+      );
     if (goal === "ATHLETE" && !c.club.ATHLETE)
       reasons.push("Cần tham gia câu lạc bộ thể thao");
     if (goal === "ARTIST" && c.portfolio < 20)
@@ -124,7 +129,11 @@ export function careerRequirements(
 export function prepareCareer(s: GameState, plan?: CareerPlan) {
   if (!plan) return;
   const c = s.careerDevelopment,
-    age = ageOn(s.birthDate, `${s.currentMonth}-01`);
+    age = ageOn(s.birthDate, simulationDate(s));
+  if (ageOn(s.birthDate, simulationDate(s)) < 5)
+    throw new Error(
+      "Luyện tập chủ động chưa phù hợp độ tuổi; người giám hộ đang chăm sóc.",
+    );
   if (
     !["GENERAL", "ATHLETE", "ARTIST"].includes(plan.goal) ||
     !Number.isInteger(plan.hours) ||

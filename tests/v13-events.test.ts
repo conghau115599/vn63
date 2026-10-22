@@ -15,9 +15,51 @@ import { resolveSchedule } from "../src/simulation/time/MonthlySchedule";
 import { advanceMonth } from "../src/simulation/core/advanceMonth";
 import { deserialize, serialize } from "../src/simulation/save";
 describe("v1.3 contextual stories and traits", () => {
-  it('requires real possessions and an unexpired contract, and supports prior-event/arc prerequisites',()=>{const s=createLife({seed:'contracts',start:'ADULT'}),bike=templates.find(t=>t.id==='bike-repair')!,project=templates.find(t=>t.id==='project')!;s.context.flags=s.context.flags.filter(f=>f!=='OWNS_VEHICLE');expect(isEventEligible(s,bike).eligible).toBe(false);s.job!.endDate='2052-01-05';expect(isEventEligible(s,project).eligible).toBe(false);const continuation={...bike,requiredActors:[],prerequisites:[{kind:'priorEvent' as const,eventId:'course',choiceId:'accept'},{kind:'arc' as const,family:'education' as const,status:'COMPLETE' as const}]};expect(isEventEligible(s,continuation).eligible).toBe(false);s.eventMemory.push({instanceId:'previous-course',eventId:'course',month:'2051-10',choiceId:'accept',contextKey:'old',authority:'SELF',sourceGrade:'ASSUMPTION'});s.arcs.push({id:'completed-course',family:'education',stage:'DONE',status:'COMPLETE'});expect(isEventEligible(s,continuation).eligible).toBe(true);});
+  it("requires real possessions and an unexpired contract, and supports prior-event/arc prerequisites", () => {
+    const s = createLife({
+        legacyDemo: true,
+        seed: "contracts",
+        start: "ADULT",
+      }),
+      bike = templates.find((t) => t.id === "bike-repair")!,
+      project = templates.find((t) => t.id === "project")!;
+    s.context.flags = s.context.flags.filter((f) => f !== "OWNS_VEHICLE");
+    expect(isEventEligible(s, bike).eligible).toBe(false);
+    s.job!.endDate = "2052-01-05";
+    expect(isEventEligible(s, project).eligible).toBe(false);
+    const continuation = {
+      ...bike,
+      requiredActors: [],
+      prerequisites: [
+        { kind: "priorEvent" as const, eventId: "course", choiceId: "accept" },
+        {
+          kind: "arc" as const,
+          family: "education" as const,
+          status: "COMPLETE" as const,
+        },
+      ],
+    };
+    expect(isEventEligible(s, continuation).eligible).toBe(false);
+    s.eventMemory.push({
+      instanceId: "previous-course",
+      eventId: "course",
+      month: "2051-10",
+      choiceId: "accept",
+      contextKey: "old",
+      authority: "SELF",
+      sourceGrade: "ASSUMPTION",
+    });
+    s.arcs.push({
+      id: "completed-course",
+      family: "education",
+      stage: "DONE",
+      status: "COMPLETE",
+    });
+    expect(isEventEligible(s, continuation).eligible).toBe(true);
+  });
   it("distinguishes age-three rich urban and rural caregiver pools without an age menu", () => {
     const a = createLife({
+      legacyDemo: true,
       seed: "three",
       context: { settlement: "URBAN", resources: "AFFLUENT" },
     });
@@ -48,6 +90,7 @@ describe("v1.3 contextual stories and traits", () => {
   });
   it("does not invent spouse or grandchildren for a widower and explains actor gates", () => {
     const a = createLife({
+      legacyDemo: true,
       seed: "old",
       start: "ADULT",
       context: { maritalStatus: "WIDOWED" },
@@ -80,7 +123,7 @@ describe("v1.3 contextual stories and traits", () => {
     ).toBe(true);
   });
   it("precludes dead actors, enforces cooldown/year boundary and choice cash gates", () => {
-    const s = createLife({ seed: "gates", start: "ADULT" }),
+    const s = createLife({ legacyDemo: true, seed: "gates", start: "ADULT" }),
       event = templates.find((t) => t.id === "mother-visit")!;
     s.npcs[0].living = false;
     expect(isEventEligible(s, event).eligible).toBe(false);
@@ -106,7 +149,11 @@ describe("v1.3 contextual stories and traits", () => {
           maxLength: 6,
         }),
         (values) => {
-          const s = createLife({ seed: "traits", start: "ADULT" });
+          const s = createLife({
+            legacyDemo: true,
+            seed: "traits",
+            start: "ADULT",
+          });
           traitNames.forEach((k, i) => (s.personality.values[k] = values[i]));
           const time = resolveSchedule(s.currentMonth, "STUDY_UPSKILL");
           const next = evolvePersonality(s, time.byCategory);
@@ -118,7 +165,7 @@ describe("v1.3 contextual stories and traits", () => {
         },
       ),
     );
-    const s = createLife({ seed: "drift", start: "ADULT" });
+    const s = createLife({ legacyDemo: true, seed: "drift", start: "ADULT" });
     const before = initialPersonality();
     s.personality = evolvePersonality(
       s,
@@ -128,7 +175,7 @@ describe("v1.3 contextual stories and traits", () => {
     expect(s.personality.baseline).toEqual(before.baseline);
   });
   it("keeps work at 75 and never invents a pension", () => {
-    let s = createLife({ seed: "old-work", start: "ADULT" });
+    let s = createLife({ legacyDemo: true, seed: "old-work", start: "ADULT" });
     s.currentMonth = "2099-01";
     const result = advanceMonth(s, { yearMonth: s.currentMonth });
     expect(result.nextState.job).not.toBeNull();
@@ -138,7 +185,11 @@ describe("v1.3 contextual stories and traits", () => {
     );
   });
   it("migrates a real v1.2-shaped monthly save with dates and ledger intact", () => {
-    const fresh = createLife({ seed: "migration", start: "ADULT" });
+    const fresh = createLife({
+      legacyDemo: true,
+      seed: "migration",
+      start: "ADULT",
+    });
     const old: Record<string, unknown> = JSON.parse(serialize(fresh));
     old.schemaVersion = 2;
     old.engineVersion = "1.2.0-alpha.1";

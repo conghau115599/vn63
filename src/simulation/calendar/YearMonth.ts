@@ -65,3 +65,24 @@ export function weekday(date: string): number {
 }
 export const dateInMonth = (month: string, day: number) =>
   `${month}-${String(Math.min(daysInMonth(month), day)).padStart(2, "0")}`;
+
+/** Civil-day arithmetic, independent of host timezone and DST. */
+export function addDays(value: string, amount: number): string {
+  parseDate(value);
+  if (!Number.isInteger(amount)) throw new Error("Số ngày phải nguyên.");
+  let month = value.slice(0, 7),
+    day = +value.slice(8) + amount;
+  while (day > daysInMonth(month)) {
+    day -= daysInMonth(month);
+    month = nextMonth(month);
+  }
+  while (day < 1) {
+    month = addMonths(month, -1);
+    day += daysInMonth(month);
+  }
+  return dateInMonth(month, day);
+}
+export function formatDate(value: string): string {
+  parseDate(value);
+  return value.split("-").reverse().join("/");
+}

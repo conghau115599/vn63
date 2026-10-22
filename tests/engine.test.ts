@@ -15,14 +15,22 @@ import { monthsBetween } from "../src/simulation/calendar/YearMonth";
 import type { GameState } from "../src/simulation/types";
 function ordinary() {
   for (let i = 0; i < 100; i++) {
-    const s = createLife({ seed: `ordinary-${i}`, start: "ADULT" });
+    const s = createLife({
+      legacyDemo: true,
+      seed: `ordinary-${i}`,
+      start: "ADULT",
+    });
     if (!eventForMonth(s)) return s;
   }
   throw new Error("no ordinary seed");
 }
 function decision(kind?: string) {
   for (let i = 0; i < 2000; i++) {
-    const s = createLife({ seed: `decision-${i}`, start: "ADULT" });
+    const s = createLife({
+      legacyDemo: true,
+      seed: `decision-${i}`,
+      start: "ADULT",
+    });
     const e = eventForMonth(s);
     if (e && (!kind || e.kind === kind)) return s;
   }
@@ -58,7 +66,7 @@ describe("monthly transaction engine", () => {
     );
   });
   it("fast-forward equals manual and all UI speeds encounter the same decision", () => {
-    let a = createLife({ seed: "manual", start: "ADULT" }),
+    let a = createLife({ legacyDemo: true, seed: "manual", start: "ADULT" }),
       b = a;
     for (let i = 0; i < 60; i++) a = finish(a);
     for (let i = 0; i < 5; i++) {
@@ -163,7 +171,7 @@ describe("monthly transaction engine", () => {
         ],
       }),
     ).toThrow(/thanh khoản/);
-    const child = createLife({ seed: "child" });
+    const child = createLife({ legacyDemo: true, seed: "child" });
     expect(() =>
       advanceMonth(child, {
         yearMonth: child.currentMonth,
@@ -233,7 +241,11 @@ describe("monthly transaction engine", () => {
     ).toThrow();
   });
   it("plays from birth to ending and performs 900 real monthly commits", () => {
-    let s = createLife({ seed: "whole-life", retainHistory: false });
+    let s = createLife({
+      legacyDemo: true,
+      seed: "whole-life",
+      retainHistory: false,
+    });
     for (let i = 0; i < 900; i++) s = finish(s);
     expect(s.committedMonths).toBe(900);
     expect(s.currentMonth).toBe("2099-01");

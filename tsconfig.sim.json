@@ -15,6 +15,7 @@
     "scripts/simulate.ts",
     "scripts/qa-v13.ts",
     "scripts/qa-careers.ts",
+    "scripts/qa-p1.ts",
     "src/simulation/**/*.ts",
     "src/content/**/*.json"
   ],

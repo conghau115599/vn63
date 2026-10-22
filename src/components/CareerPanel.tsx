@@ -7,6 +7,7 @@ import {
   type CareerPlan,
   type Talent,
 } from "../simulation/careers";
+import { simulationDate } from "../simulation/world/contracts";
 import { ageOn } from "../simulation/calendar/YearMonth";
 import type { GameState, MonthlyInput } from "../simulation/types";
 export function CareerPanel({
@@ -17,7 +18,7 @@ export function CareerPanel({
   onAdvance: (input: Partial<MonthlyInput>) => void;
 }) {
   const c = game.careerDevelopment,
-    age = ageOn(game.birthDate, `${game.currentMonth}-01`),
+    age = ageOn(game.birthDate, simulationDate(game)),
     locked = !!game.cursor || !game.living;
   const [goal, setGoal] = useState<Talent>(
     c.goal === "GENERAL"
@@ -59,7 +60,7 @@ export function CareerPanel({
                 </span>
                 <span>
                   Nền tảng hiện tại{" "}
-                  <strong>{profile.foundation.toFixed(0)}/100</strong>
+                  <strong>{Math.round(profile.foundation)}/100</strong>
                 </span>
                 <small>
                   {c.aptitude[talent] >= 75
@@ -194,7 +195,7 @@ export function CareerPanel({
             <div key={metric.label}>
               <span>{metric.label}</span>
               <strong>
-                {metric.value.toFixed(1)}
+                {Math.round(metric.value)}
                 <small> / {metric.target}</small>
               </strong>
               <progress
@@ -212,7 +213,7 @@ export function CareerPanel({
         </div>
         {goal === "ARTIST" && (
           <p>
-            Hồ sơ biểu diễn: {c.portfolio.toFixed(1)} / 20 điểm để dự tuyển.
+            Hồ sơ biểu diễn: {Math.round(c.portfolio)} / 20 điểm để dự tuyển.
           </p>
         )}
         <h3>1. Câu lạc bộ</h3>
@@ -232,7 +233,7 @@ export function CareerPanel({
         </button>
         <h3>2. Tuyển chọn chuyên nghiệp</h3>
         <p className="career-readiness">
-          Mức sẵn sàng hiện tại: <b>{fit.readiness.toFixed(1)} / 58 điểm</b>
+          Mức sẵn sàng hiện tại: <b>{Math.round(fit.readiness)} / 58 điểm</b>
         </p>
         <p className="fine">
           Kỹ năng 60% · bẩm sinh 15% · kinh nghiệm 13% · nền tảng 12%, trừ mệt
@@ -271,7 +272,7 @@ export function CareerPanel({
           .map((t) => (
             <p key={`${t.month}/${t.goal}`}>
               {t.month} · {t.goal === "ATHLETE" ? "Thể thao" : "Biểu diễn"} ·{" "}
-              {t.score.toFixed(1)} điểm · {t.passed ? "Đạt" : "Cần luyện thêm"}
+              {Math.round(t.score)} điểm · {t.passed ? "Đạt" : "Cần luyện thêm"}
             </p>
           ))}
         <p className="fine">
