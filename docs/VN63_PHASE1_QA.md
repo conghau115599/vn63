@@ -34,4 +34,3 @@ Ngày 22/10/2026. Baseline main 80cc995; kết quả dưới đây là chạy th
 ![Desktop](qa/p1/desktop.png)
 
 ![Mobile](qa/p1/mobile.png)
-
